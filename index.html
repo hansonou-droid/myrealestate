@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>不動產顧問 | 專業稅務規劃與市場分析</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C5A059;
+  --gold-light: #E8D5A8;
+  --dark: #1E293B;
+  --dark-soft: #334155;
+  --gray: #64748B;
+  --gray-light: #E2E8F0;
+  --bg: #F8FAFC;
+  --white: #FFFFFF;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', 'Noto Sans TC', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: var(--bg);
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+/* ===== Navigation ===== */
+.nav {
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-light);
+  padding: 0 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--dark);
+  text-decoration: none;
+}
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--gold);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.1rem;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  list-style: none;
+}
+.nav-links a {
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--gray);
+  transition: color 0.2s;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--dark);
+  border-bottom-color: var(--gold);
+}
+.nav-cta {
+  background: var(--dark);
+  color: white !important;
+  padding: 10px 20px !important;
+  border-radius: 8px;
+  border-bottom: none !important;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: opacity 0.2s;
+}
+.nav-cta:hover { opacity: 0.9; color: white !important; }
+
+/* ===== Hero ===== */
+.hero {
+  background: linear-gradient(135deg, var(--dark) 0%, #0f172a 100%);
+  color: white;
+  padding: 5rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(197,160,89,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.hero-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(197,160,89,0.15);
+  color: var(--gold-light);
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+.hero-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.hero h1 {
+  font-size: 3.25rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
+}
+.hero h1 span { color: var(--gold); }
+.hero p {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.7);
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.btn-primary {
+  background: var(--gold);
+  color: var(--dark);
+  text-decoration: none;
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(197,160,89,0.3);
+}
+.btn-secondary {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  text-decoration: none;
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: background 0.2s;
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.18); }
+
+/* ===== Quick Links ===== */
+.quick-links {
+  max-width: 1200px;
+  margin: -2rem auto 0;
+  padding: 0 2rem;
+  position: relative;
+  z-index: 2;
+}
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+.quick-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 2rem;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid var(--gray-light);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  transition: transform 0.25s, box-shadow 0.25s;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.quick-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+}
+.quick-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin-bottom: 4px;
+}
+.quick-icon.gold { background: rgba(197,160,89,0.12); color: var(--gold); }
+.quick-icon.dark { background: rgba(30,41,59,0.08); color: var(--dark); }
+.quick-card h3 { font-size: 1.1rem; font-weight: 700; }
+.quick-card p {
+  font-size: 0.88rem;
+  color: var(--gray);
+  line-height: 1.5;
+}
+.quick-card .arrow {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: auto;
+}
+
+/* ===== Features ===== */
+.features {
+  max-width: 1200px;
+  margin: 5rem auto;
+  padding: 0 2rem;
+  text-align: center;
+}
+.features h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+.features > p {
+  color: var(--gray);
+  max-width: 550px;
+  margin: 0 auto 3rem;
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  text-align: left;
+}
+.feature-card {
+  padding: 1.5rem;
+}
+.feature-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.feature-card p {
+  font-size: 0.88rem;
+  color: var(--gray);
+}
+
+/* ===== Tools Section ===== */
+.tools {
+  background: linear-gradient(135deg, var(--dark) 0%, #0f172a 100%);
+  color: white;
+  padding: 5rem 2rem;
+  text-align: center;
+}
+.tools-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.tools h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+.tools > p {
+  color: rgba(255,255,255,0.6);
+  max-width: 550px;
+  margin: 0 auto 3rem;
+}
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  text-align: left;
+}
+.tool-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  text-decoration: none;
+  color: white;
+  transition: background 0.25s, transform 0.25s;
+}
+.tool-card:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-3px);
+}
+.tool-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.tool-card p {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 1rem;
+}
+.tool-card .tag {
+  display: inline-block;
+  background: rgba(197,160,89,0.2);
+  color: var(--gold-light);
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ===== Footer ===== */
+.footer {
+  background: var(--white);
+  border-top: 1px solid var(--gray-light);
+  padding: 3rem 2rem;
+}
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.footer-links {
+  display: flex;
+  gap: 2rem;
+}
+.footer-links a {
+  color: var(--gray);
+  text-decoration: none;
+  font-size: 0.88rem;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--gold); }
+.footer p {
+  color: var(--gray);
+  font-size: 0.85rem;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hero h1 { font-size: 2.2rem; }
+  .quick-grid { grid-template-columns: 1fr; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">🏠</span>
+      專業不動產顧問
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">首頁</a></li>
+      <li><a href="news.html">市場新聞</a></li>
+      <li><a href="tax.html">稅務計算</a></li>
+      <li><a href="contact.html">聯絡諮詢</a></li>
+      <li><a href="contact.html" class="nav-cta">預約諮詢</a></li>
+    </ul>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">專業・誠信・價值</div>
+    <h1>為您的資產<br><span>創造最大價值</span></h1>
+    <p>
+      深耕不動產市場多年，提供最精準的稅務規劃與市場洞察。<br>
+      不只是買賣，更是您資產增值的長期夥伴。
+    </p>
+    <div class="hero-buttons">
+      <a href="tax.html" class="btn-primary">📊 立即試算稅賦</a>
+      <a href="news.html" class="btn-secondary">📰 查看最新新聞 →</a>
+    </div>
+  </div>
+</section>
+
+<div class="quick-links">
+  <div class="quick-grid">
+    <a href="tax.html" class="quick-card">
+      <div class="quick-icon gold">📊</div>
+      <h3>稅務精算工具</h3>
+      <p>土增稅、房地合一稅等專業試算，精確掌握交易成本與節稅規劃。</p>
+      <span class="arrow">開始計算 →</span>
+    </a>
+    <a href="news.html" class="quick-card">
+      <div class="quick-icon dark">📰</div>
+      <h3>不動產新聞誌</h3>
+      <p>每日更新不動產政策、市場趨勢與重劃區資訊，掌握房市脈動。</p>
+      <span class="arrow">閱讀新聞 →</span>
+    </a>
+    <a href="contact.html" class="quick-card">
+      <div class="quick-icon gold">📞</div>
+      <h3>專業諮詢預約</h3>
+      <p>買賣、租賃或稅務規劃，一對一專業顧問為您提供最適建議。</p>
+      <span class="arrow">立即預約 →</span>
+    </a>
+  </div>
+</div>
+
+<section class="features">
+  <h2>為什麼選擇我們？</h2>
+  <p>從估價、稅務到簽約交屋，提供全程專業服務</p>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <h3>🛡️ 交易安全</h3>
+      <p>全程法律與地政士服務，確保每一筆交易安全無虞。</p>
+    </div>
+    <div class="feature-card">
+      <h3>📈 市場洞察</h3>
+      <p>每日追蹤市場數據，提供精準的趨勢分析與投資建議。</p>
+    </div>
+    <div class="feature-card">
+      <h3>💰 稅務優化</h3>
+      <p>專業稅務規劃，為您節省每一分應得的稅賦優惠。</p>
+    </div>
+    <div class="feature-card">
+      <h3>🤝 全程陪伴</h3>
+      <p>從初次諮詢到交屋完成，單一窗口專屬顧問服務。</p>
+    </div>
+  </div>
+</section>
+
+<section class="tools">
+  <div class="tools-inner">
+    <h2>專業工具與資源</h2>
+    <p>一站式滿足您的不動產需求</p>
+    <div class="tool-grid">
+      <a href="tax.html" class="tool-card">
+        <h3>不動產稅賦試算</h3>
+        <p>土地增值稅、房地合一稅、契稅、持有稅 — 四大稅費一次算清。</p>
+        <span class="tag">立即試算</span>
+      </a>
+      <a href="news.html" class="tool-card">
+        <h3>即時市場新聞</h3>
+        <p>政策法規、市場分析、區域發展、房貸金融 — 每日更新。</p>
+        <span class="tag">閱讀更多</span>
+      </a>
+      <a href="contact.html" class="tool-card">
+        <h3>預約專業諮詢</h3>
+        <p>無論是買賣、租賃或稅務規劃，為您提供最專業的建議。</p>
+        <span class="tag">免費諮詢</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <p>© 2024 專業不動產顧問 David Chen. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="index.html">首頁</a>
+      <a href="news.html">市場新聞</a>
+      <a href="tax.html">稅務計算</a>
+      <a href="contact.html">聯絡諮詢</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
