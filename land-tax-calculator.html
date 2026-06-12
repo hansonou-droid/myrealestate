@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>土地增值稅計算機</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: #f0f4f8;
+    color: #2d3748;
+    line-height: 1.6;
+    padding: 20px;
+  }
+  .container { max-width: 860px; margin: 0 auto; }
+  h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    color: #1a365d;
+    margin-bottom: 8px;
+  }
+  .subtitle { text-align: center; color: #718096; margin-bottom: 28px; font-size: 0.95rem; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+  .card h2 {
+    font-size: 1.15rem;
+    color: #2b6cb0;
+    border-bottom: 2px solid #ebf4ff;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .form-group { display: flex; flex-direction: column; }
+  .form-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 4px;
+  }
+  .form-group label .unit { font-weight: 400; color: #a0aec0; font-size: 0.82rem; }
+  .form-group input, .form-group select {
+    padding: 10px 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  .form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66,153,225,0.12);
+  }
+  .form-group input[readonly] { background: #f7fafc; color: #718096; }
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .toggle-label input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: #2b6cb0;
+  }
+  .btn-row { text-align: center; margin-top: 8px; }
+  .btn {
+    padding: 12px 48px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: #2b6cb0;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: inherit;
+  }
+  .btn:hover { background: #1a4f8a; }
+  .btn:active { transform: scale(0.98); }
+  .result-area { display: none; }
+  .result-area.show { display: block; }
+  .result-card {
+    background: linear-gradient(135deg, #ebf8ff 0%, #e9d8fd 100%);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+  }
+  .result-big {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #c53030;
+    margin: 8px 0;
+  }
+  .result-breakdown {
+    font-size: 0.92rem;
+    color: #4a5568;
+    margin-top: 16px;
+    line-height: 2;
+  }
+  .result-breakdown td { padding: 3px 12px 3px 0; }
+  .result-breakdown td:last-child { font-weight: 600; text-align: right; }
+  .note {
+    background: #fffff0;
+    border-left: 4px solid #ecc94b;
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+    color: #744210;
+    margin-top: 12px;
+  }
+  .highlight { background: #fefcbf; padding: 2px 6px; border-radius: 3px; }
+  .info-tip {
+    font-size: 0.82rem;
+    color: #a0aec0;
+    margin-top: 2px;
+  }
+  .error {
+    color: #e53e3e;
+    font-size: 0.88rem;
+    text-align: center;
+    margin-top: 12px;
+  }
+  @media (max-width: 600px) {
+    .card { padding: 20px 16px; }
+    .form-row { grid-template-columns: 1fr; }
+    h1 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>土地增值稅計算機</h1>
+  <p class="subtitle">依照土地稅法規定，計算土地移轉時應納之土地增值稅</p>
+
+  <!-- Input Section -->
+  <div class="card">
+    <h2>土地資料</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>土地面積 <span class="unit">（平方公尺）</span></label>
+        <input type="number" id="area" placeholder="例：100" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>本次申報移轉現值 <span class="unit">（元/平方公尺）</span></label>
+        <input type="number" id="currentValue" placeholder="例：80,000" min="0">
+        <span class="info-tip">通常為當期公告土地現值</span>
+      </div>
+      <div class="form-group">
+        <label>前次移轉現值（原地價）<span class="unit">（元/平方公尺）</span></label>
+        <input type="number" id="prevValue" placeholder="例：30,000" min="0">
+        <span class="info-tip">前次取得時之公告土地現值</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>物價指數調整</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>前次移轉時物價指數</label>
+        <input type="number" id="cpiOld" value="100" min="1" step="0.01">
+        <span class="info-tip">預設 100，可依實際指數調整</span>
+      </div>
+      <div class="form-group">
+        <label>本次移轉時物價指數</label>
+        <input type="number" id="cpiNew" value="100" min="1" step="0.01">
+        <span class="info-tip">可查詢行政院主計總處公布之 CPI</span>
+      </div>
+      <div class="form-group">
+        <label>CPI 調整倍率</label>
+        <input type="text" id="cpiRate" readonly value="1.0000">
+        <span class="info-tip">自動計算</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>費用扣除及條件</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>土地改良費用 <span class="unit">（元，總額）</span></label>
+        <input type="number" id="improvement" value="0" min="0">
+        <span class="info-tip">工程受益費、土地重劃費用等</span>
+      </div>
+      <div class="form-group">
+        <label>持有年限 <span class="unit">（年）</span></label>
+        <input type="number" id="holdingYears" placeholder="例：15" min="0" step="0.1">
+      </div>
+    </div>
+    <div class="toggle-row">
+      <label class="toggle-label">
+        <input type="checkbox" id="selfUse">
+        適用自用住宅用地稅率（一生一次，優惠稅率 10%）
+      </label>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="calculate()">計算土地增值稅</button>
+    </div>
+    <div id="errorMsg" class="error"></div>
+  </div>
+
+  <!-- Result Section -->
+  <div id="resultArea" class="result-area">
+    <div class="result-card">
+      <h2 style="border:none;margin-bottom:0;text-align:center;">應納土地增值稅</h2>
+      <div class="result-big" id="totalTax"></div>
+      <table class="result-breakdown" style="width:100%;">
+        <tr><td>申報移轉現值總額</td><td id="rTotalCurrent"></td></tr>
+        <tr><td>CPI 調整後前次移轉現值總額</td><td id="rAdjPrev"></td></tr>
+        <tr><td>土地改良費用</td><td id="rImprovement"></td></tr>
+        <tr style="border-top:1px solid #cbd5e0;"><td><strong>土地漲價總數額</strong></td><td id="rIncrement"></td></tr>
+        <tr><td>漲價倍數</td><td id="rRatio"></td></tr>
+        <tr style="border-top:1px solid #cbd5e0;"><td>適用稅率結構</td><td id="rRateInfo"></td></tr>
+        <tr id="longTermRow" style="display:none;"><td>長期持有減徵</td><td id="rLongTermReduction"></td></tr>
+      </table>
+      <div id="calcDetail" style="margin-top:16px;font-size:0.9rem;color:#4a5568;line-height:1.8;"></div>
+    </div>
+    <div class="note">
+      <strong>注意事項：</strong><br>
+      1. 本計算僅供參考，實際稅額以稅捐稽徵機關核定為準。<br>
+      2. 自用住宅用地優惠稅率每人一生限用一次，且面積限制為都市土地 3 公畝（300 ㎡）、非都市土地 7 公畝（700 ㎡）以內。<br>
+      3. 持有超過 20 年者，就超過原規定地價部分之稅額減徵 20%；超過 30 年減徵 30%；超過 40 年減徵 40%。<br>
+      4. CPI 指數請查詢行政院主計總處公布之「消費者物價指數」。
+    </div>
+  </div>
+</div>
+
+<script>
+// CPI rate auto-calc
+const cpiOldEl = document.getElementById('cpiOld');
+const cpiNewEl = document.getElementById('cpiNew');
+const cpiRateEl = document.getElementById('cpiRate');
+
+function updateCpiRate() {
+  const oldIdx = parseFloat(cpiOldEl.value) || 1;
+  const newIdx = parseFloat(cpiNewEl.value) || 1;
+  if (oldIdx <= 0) return;
+  cpiRateEl.value = (newIdx / oldIdx).toFixed(4);
+}
+cpiOldEl.addEventListener('input', updateCpiRate);
+cpiNewEl.addEventListener('input', updateCpiRate);
+
+function fmt(n) {
+  if (n == null || isNaN(n)) return '-';
+  return Math.round(n).toLocaleString('zh-TW') + ' 元';
+}
+
+function calculate() {
+  const area = parseFloat(document.getElementById('area').value);
+  const currValPerSqm = parseFloat(document.getElementById('currentValue').value);
+  const prevValPerSqm = parseFloat(document.getElementById('prevValue').value);
+  const improvement = parseFloat(document.getElementById('improvement').value) || 0;
+  const holdingYears = parseFloat(document.getElementById('holdingYears').value);
+  const selfUse = document.getElementById('selfUse').checked;
+  const errorEl = document.getElementById('errorMsg');
+
+  // Validate
+  if (isNaN(area) || area <= 0) { errorEl.textContent = '請輸入有效的土地面積'; return; }
+  if (isNaN(currValPerSqm) || currValPerSqm < 0) { errorEl.textContent = '請輸入有效的本次申報移轉現值'; return; }
+  if (isNaN(prevValPerSqm) || prevValPerSqm < 0) { errorEl.textContent = '請輸入有效的前次移轉現值'; return; }
+  if (isNaN(holdingYears) || holdingYears < 0) { errorEl.textContent = '請輸入有效的持有年限'; return; }
+  errorEl.textContent = '';
+
+  const oldCpi = parseFloat(cpiOldEl.value) || 100;
+  const newCpi = parseFloat(cpiNewEl.value) || 100;
+  const cpiAdj = newCpi / oldCpi;
+
+  // Totals
+  const totalCurrent = currValPerSqm * area;
+  const adjPrevPerSqm = prevValPerSqm * cpiAdj;
+  const totalAdjPrev = adjPrevPerSqm * area;
+
+  // Land value increment
+  const increment = Math.max(0, totalCurrent - totalAdjPrev - improvement);
+  const adjPrevTotal = totalAdjPrev; // adjusted previous total value
+
+  if (adjPrevTotal <= 0) {
+    errorEl.textContent = 'CPI 調整後之前次移轉現值須大於 0，請確認輸入數值';
+    return;
+  }
+
+  const ratio = increment / adjPrevTotal;
+
+  // Tax calculation
+  let tax = 0;
+  let rateInfo = '';
+  let calcDetailLines = [];
+
+  if (selfUse) {
+    // Self-use residence: flat 10%
+    tax = increment * 0.10;
+    rateInfo = '自用住宅用地 10%';
+    calcDetailLines.push(`${fmt(increment)} × 10% = ${fmt(tax)}`);
+  } else {
+    // General progressive rates
+    const bracket1 = adjPrevTotal;       // up to 1x
+    const bracket2 = adjPrevTotal * 2;   // up to 2x
+
+    let inBracket1 = 0, inBracket2 = 0, inBracket3 = 0;
+
+    if (increment <= bracket1) {
+      inBracket1 = increment;
+      inBracket2 = 0;
+      inBracket3 = 0;
+    } else if (increment <= bracket2) {
+      inBracket1 = bracket1;
+      inBracket2 = increment - bracket1;
+      inBracket3 = 0;
+    } else {
+      inBracket1 = bracket1;
+      inBracket2 = bracket2 - bracket1;
+      inBracket3 = increment - bracket2;
+    }
+
+    // Base rates
+    let tax20 = inBracket1 * 0.20;
+    let tax30 = inBracket2 * 0.30;
+    let tax40 = inBracket3 * 0.40;
+
+    rateInfo = `第一級 20%（漲價 ≤ 1 倍） / 第二級 30%（1~2 倍） / 第三級 40%（> 2 倍）`;
+
+    if (inBracket1 > 0) calcDetailLines.push(`漲價在第一倍以內：${fmt(inBracket1)} × 20% = ${fmt(tax20)}`);
+    if (inBracket2 > 0) calcDetailLines.push(`漲價在 1~2 倍部分：${fmt(inBracket2)} × 30% = ${fmt(tax30)}`);
+    if (inBracket3 > 0) calcDetailLines.push(`漲價超過 2 倍部分：${fmt(inBracket3)} × 40% = ${fmt(tax40)}`);
+
+    // Long-term holding reduction
+    // Applies to the portion ABOVE the original adjusted value (i.e., inBracket2 + inBracket3)
+    let reductionRate = 0;
+    if (holdingYears > 40)      reductionRate = 0.40;
+    else if (holdingYears > 30) reductionRate = 0.30;
+    else if (holdingYears > 20) reductionRate = 0.20;
+
+    if (reductionRate > 0) {
+      const excessTax = tax30 + tax40; // tax on portion exceeding 1x
+      const reductionAmount = excessTax * reductionRate;
+      tax = tax20 + tax30 + tax40 - reductionAmount;
+      document.getElementById('longTermRow').style.display = '';
+      document.getElementById('rLongTermReduction').textContent =
+        `超過 1 倍部分稅額 ${fmt(excessTax)} × ${Math.round(reductionRate*100)}% = -${fmt(reductionAmount)}`;
+      calcDetailLines.push(`長期持有減徵（持有 ${holdingYears} 年）：超過原地價部分減徵 ${Math.round(reductionRate*100)}%，扣除 ${fmt(reductionAmount)}`);
+    } else {
+      tax = tax20 + tax30 + tax40;
+      document.getElementById('longTermRow').style.display = 'none';
+    }
+  }
+
+  // Update result area
+  document.getElementById('totalTax').textContent = fmt(tax);
+  document.getElementById('rTotalCurrent').textContent = fmt(totalCurrent);
+  document.getElementById('rAdjPrev').textContent = fmt(totalAdjPrev);
+  document.getElementById('rImprovement').textContent = fmt(improvement);
+  document.getElementById('rIncrement').textContent = fmt(increment);
+  document.getElementById('rRatio').textContent = ratio.toFixed(2) + ' 倍';
+  document.getElementById('rRateInfo').textContent = rateInfo;
+  document.getElementById('calcDetail').innerHTML = calcDetailLines.map(l => '• ' + l).join('<br>');
+
+  document.getElementById('resultArea').classList.add('show');
+  document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

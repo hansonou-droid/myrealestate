@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台銀匯率換算</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f5f7fa;
+    color: #1a1a2e;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  .container { max-width: 900px; width: 100%; }
+  h1 {
+    font-size: 24px;
+    text-align: center;
+    margin: 24px 0 8px;
+    color: #1a365d;
+  }
+  .subtitle {
+    text-align: center;
+    color: #718096;
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+  .converter {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    margin-bottom: 24px;
+  }
+  .converter .row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .converter .row + .row { margin-top: 12px; }
+  .converter input, .converter select {
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 16px;
+    background: #fafbfc;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .converter input:focus, .converter select:focus {
+    border-color: #3182ce;
+    background: white;
+  }
+  .converter input[type="number"] {
+    width: 160px;
+    -moz-appearance: textfield;
+  }
+  .converter input[type="number"]::-webkit-inner-spin-button,
+  .converter input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+  .converter select { min-width: 120px; }
+  .converter .swap-btn {
+    background: #edf2f7;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s;
+    flex-shrink: 0;
+  }
+  .converter .swap-btn:hover { background: #e2e8f0; }
+  .converter .rate-type {
+    display: flex;
+    gap: 8px;
+  }
+  .converter .rate-type label {
+    font-size: 13px;
+    color: #4a5568;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .result-box {
+    margin-top: 16px;
+    padding: 16px 20px;
+    background: #ebf8ff;
+    border-radius: 12px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #2b6cb0;
+    text-align: center;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-break: break-all;
+  }
+  .result-box .rate-info {
+    font-weight: 400;
+    font-size: 14px;
+    color: #718096;
+    margin-top: 4px;
+  }
+  .table-wrap {
+    background: white;
+    border-radius: 16px;
+    overflow-x: auto;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  th {
+    background: #f7fafc;
+    color: #4a5568;
+    font-weight: 600;
+    padding: 12px 10px;
+    text-align: right;
+    white-space: nowrap;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  th:first-child { text-align: left; padding-left: 16px; }
+  td {
+    padding: 10px;
+    text-align: right;
+    border-bottom: 1px solid #edf2f7;
+    white-space: nowrap;
+  }
+  td:first-child {
+    text-align: left;
+    padding-left: 16px;
+    font-weight: 500;
+  }
+  td .code {
+    color: #a0aec0;
+    font-size: 12px;
+    margin-left: 4px;
+  }
+  td.clickable {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  td.clickable:hover { background: #ebf8ff; }
+  tr:last-child td { border-bottom: none; }
+  .no-rate { color: #cbd5e0; }
+  .updated {
+    text-align: center;
+    color: #a0aec0;
+    font-size: 12px;
+    margin-top: 12px;
+    margin-bottom: 40px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>台灣銀行匯率換算</h1>
+  <p class="subtitle">資料來源：台灣銀行牌告匯率</p>
+
+  <div class="converter">
+    <div class="row">
+      <input type="number" id="amount" value="1" min="0" step="any">
+      <select id="fromCurrency"></select>
+      <button class="swap-btn" id="swapBtn" title="互換貨幣">⇄</button>
+      <select id="toCurrency"></select>
+    </div>
+    <div class="row">
+      <div class="rate-type">
+        <label><input type="radio" name="rateType" value="spot" checked> 即期</label>
+        <label><input type="radio" name="rateType" value="cash"> 現金</label>
+      </div>
+    </div>
+    <div class="result-box" id="result">
+      請輸入金額
+      <div class="rate-info"></div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table id="rateTable">
+      <thead>
+        <tr>
+          <th>貨幣</th>
+          <th>現金買入</th>
+          <th>現金賣出</th>
+          <th>即期買入</th>
+          <th>即期賣出</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <p class="updated" id="updatedTime"></p>
+</div>
+
+<script>
+const rates = [
+  { name: "美金", code: "USD", cashBuy: 31.025, cashSell: 31.695, spotBuy: 31.35, spotSell: 31.50 },
+  { name: "港幣", code: "HKD", cashBuy: 3.858, cashSell: 4.062, spotBuy: 3.979, spotSell: 4.049 },
+  { name: "英鎊", code: "GBP", cashBuy: 41.57, cashSell: 43.69, spotBuy: 42.465, spotSell: 43.095 },
+  { name: "澳幣", code: "AUD", cashBuy: 22.38, cashSell: 23.16, spotBuy: 22.595, spotSell: 22.94 },
+  { name: "加拿大幣", code: "CAD", cashBuy: 22.48, cashSell: 23.39, spotBuy: 22.81, spotSell: 23.14 },
+  { name: "新加坡幣", code: "SGD", cashBuy: 24.22, cashSell: 25.13, spotBuy: 24.69, spotSell: 24.91 },
+  { name: "瑞士法郎", code: "CHF", cashBuy: 39.64, cashSell: 40.84, spotBuy: 40.25, spotSell: 40.64 },
+  { name: "日圓", code: "JPY", cashBuy: 0.1915, cashSell: 0.2043, spotBuy: 0.1983, spotSell: 0.2033 },
+  { name: "南非幣", code: "ZAR", cashBuy: null, cashSell: null, spotBuy: 1.873, spotSell: 1.963 },
+  { name: "瑞典幣", code: "SEK", cashBuy: null, cashSell: null, spotBuy: 3.35, spotSell: 3.47 },
+  { name: "紐元", code: "NZD", cashBuy: 18.26, cashSell: 19.11, spotBuy: 18.59, spotSell: 18.89 },
+  { name: "泰幣", code: "THB", cashBuy: 0.8472, cashSell: 1.0372, spotBuy: 0.9576, spotSell: 1.0036 },
+  { name: "菲國比索", code: "PHP", cashBuy: 0.4528, cashSell: 0.5848, spotBuy: null, spotSell: null },
+  { name: "印尼幣", code: "IDR", cashBuy: 0.00148, cashSell: 0.00218, spotBuy: null, spotSell: null },
+  { name: "歐元", code: "EUR", cashBuy: 36.21, cashSell: 37.55, spotBuy: 36.725, spotSell: 37.325 },
+  { name: "韓元", code: "KRW", cashBuy: 0.01976, cashSell: 0.02366, spotBuy: null, spotSell: null },
+  { name: "越南盾", code: "VND", cashBuy: 0.00095, cashSell: 0.00136, spotBuy: null, spotSell: null },
+  { name: "馬來幣", code: "MYR", cashBuy: 6.989, cashSell: 8.514, spotBuy: null, spotSell: null },
+  { name: "人民幣", code: "CNY", cashBuy: 4.528, cashSell: 4.69, spotBuy: 4.595, spotSell: 4.655 }
+];
+
+const rateMap = Object.fromEntries(rates.map(r => [r.code, r]));
+
+// TWD special entry
+rateMap["TWD"] = { name: "新台幣", code: "TWD", cashBuy: 1, cashSell: 1, spotBuy: 1, spotSell: 1 };
+
+function fmt(v) {
+  if (v == null) return "—";
+  if (Math.abs(v) < 0.01) return v.toFixed(5);
+  if (Math.abs(v) < 1) return v.toFixed(4);
+  return v.toFixed(v >= 100 ? 3 : 4);
+}
+
+function populateSelects() {
+  const from = document.getElementById("fromCurrency");
+  const to = document.getElementById("toCurrency");
+  const allCurrencies = [rateMap["TWD"], ...rates];
+  allCurrencies.forEach(r => {
+    const o1 = document.createElement("option");
+    o1.value = r.code;
+    o1.textContent = `${r.name} (${r.code})`;
+    from.appendChild(o1);
+    const o2 = document.createElement("option");
+    o2.value = r.code;
+    o2.textContent = `${r.name} (${r.code})`;
+    to.appendChild(o2);
+  });
+  from.value = "TWD";
+  to.value = "USD";
+}
+
+function getRate(currency, type, direction) {
+  // direction: 'buy' means bank buys (we sell foreign), 'sell' means bank sells (we buy foreign)
+  const c = rateMap[currency];
+  if (!c) return null;
+  if (currency === "TWD") return 1;
+  if (type === "spot") return direction === "buy" ? c.spotBuy : c.spotSell;
+  return direction === "buy" ? c.cashBuy : c.cashSell;
+}
+
+function convert() {
+  const amount = parseFloat(document.getElementById("amount").value);
+  const from = document.getElementById("fromCurrency").value;
+  const to = document.getElementById("toCurrency").value;
+  const type = document.querySelector('input[name="rateType"]:checked').value;
+  const resultEl = document.getElementById("result");
+
+  if (isNaN(amount) || amount < 0) {
+    resultEl.innerHTML = "請輸入有效金額";
+    return;
+  }
+
+  // We need: amount in FROM currency → TWD → TO currency
+  // Step 1: FROM → TWD
+  //   If FROM is foreign, we sell foreign → bank buys = use buy rate
+  //   If FROM is TWD, rate = 1
+  const fromRate = getRate(from, type, "buy");
+  if (fromRate == null) {
+    resultEl.innerHTML = `${rateMap[from].name} 無 ${type==='spot'?'即期':'現金'}匯率`;
+    return;
+  }
+  const twdAmount = from === "TWD" ? amount : amount * fromRate;
+
+  // Step 2: TWD → TO
+  //   If TO is foreign, we buy foreign from bank = bank sells = use sell rate
+  //   If TO is TWD, rate = 1
+  const toRate = getRate(to, type, "sell");
+  if (toRate == null) {
+    resultEl.innerHTML = `${rateMap[to].name} 無 ${type==='spot'?'即期':'現金'}匯率`;
+    return;
+  }
+  const result = to === "TWD" ? twdAmount : twdAmount / toRate;
+
+  const fromName = rateMap[from].name;
+  const toName = rateMap[to].name;
+  const typeLabel = type === "spot" ? "即期" : "現金";
+
+  // Calculate effective rate
+  const effectiveRate = fromRate / toRate;
+
+  resultEl.innerHTML = `
+    ${fmt(result)} ${toName} (${to})
+    <div class="rate-info">
+      ${fmt(amount)} ${fromName} × 匯率 ${fmt(effectiveRate)} = ${fmt(result)} ${toName}
+    </div>
+  `;
+}
+
+function buildTable() {
+  const tbody = document.querySelector("#rateTable tbody");
+  rates.forEach(r => {
+    const tr = document.createElement("tr");
+    const nameTd = document.createElement("td");
+    nameTd.textContent = r.name;
+    const codeSpan = document.createElement("span");
+    codeSpan.className = "code";
+    codeSpan.textContent = r.code;
+    nameTd.appendChild(codeSpan);
+
+    const cells = [
+      { val: r.cashBuy, key: "cashBuy" },
+      { val: r.cashSell, key: "cashSell" },
+      { val: r.spotBuy, key: "spotBuy" },
+      { val: r.spotSell, key: "spotSell" }
+    ];
+
+    tr.appendChild(nameTd);
+    cells.forEach(c => {
+      const td = document.createElement("td");
+      td.textContent = c.val != null ? fmt(c.val) : "—";
+      td.className = "no-rate";
+      if (c.val != null) {
+        td.className = "clickable";
+        td.title = `點擊將 ${r.name} 設為目標貨幣`;
+        td.addEventListener("click", () => {
+          document.getElementById("toCurrency").value = r.code;
+          convert();
+        });
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById("amount").addEventListener("input", convert);
+document.getElementById("fromCurrency").addEventListener("change", convert);
+document.getElementById("toCurrency").addEventListener("change", convert);
+document.getElementById("swapBtn").addEventListener("click", () => {
+  const from = document.getElementById("fromCurrency");
+  const to = document.getElementById("toCurrency");
+  [from.value, to.value] = [to.value, from.value];
+  convert();
+});
+document.querySelectorAll('input[name="rateType"]').forEach(el => {
+  el.addEventListener("change", convert);
+});
+
+function getUpdateTime() {
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
+  const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  document.getElementById("updatedTime").textContent = `資料日期：2026/05/08（更新時間 ${dateStr} ${timeStr}）`;
+}
+
+populateSelects();
+buildTable();
+convert();
+getUpdateTime();
+</script>
+</body>
+</html>

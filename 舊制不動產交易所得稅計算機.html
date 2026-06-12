@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>舊制不動產交易所得稅計算機</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+    padding: 20px;
+  }
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 6px;
+    color: #16213e;
+  }
+  .subtitle {
+    color: #555;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  .note {
+    background: #fff8e1;
+    border-left: 4px solid #f5a623;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #6b5200;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .card-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e8e8e8;
+  }
+  .form-group {
+    margin-bottom: 14px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #333;
+  }
+  .form-group .hint {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #3a86ff;
+    box-shadow: 0 0 0 3px rgba(58,134,255,0.15);
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .method-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .method-btn {
+    padding: 8px 16px;
+    border: 2px solid #d0d0d0;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .method-btn:hover { border-color: #3a86ff; color: #3a86ff; }
+  .method-btn.active {
+    border-color: #3a86ff;
+    background: #3a86ff;
+    color: #fff;
+  }
+  .method-section { display: none; }
+  .method-section.active { display: block; }
+
+  .result-box {
+    background: #e8f4f8;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-top: 16px;
+  }
+  .result-box h3 {
+    font-size: 15px;
+    color: #0d3b66;
+    margin-bottom: 10px;
+  }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 14px;
+    border-bottom: 1px dashed rgba(0,0,0,0.08);
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-row .label { color: #555; }
+  .result-row .value { font-weight: 600; }
+  .result-row.total {
+    border-top: 2px solid #0d3b66;
+    margin-top: 6px;
+    padding-top: 10px;
+    font-size: 16px;
+  }
+  .result-row.total .value { color: #e63946; font-size: 18px; }
+
+  .tax-rates {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .rate-btn {
+    padding: 8px 4px;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+  .rate-btn:hover { border-color: #3a86ff; }
+  .rate-btn.active {
+    background: #3a86ff;
+    color: #fff;
+    border-color: #3a86ff;
+  }
+  .rate-btn .rate-pct { font-weight: 700; font-size: 15px; }
+  .rate-btn .rate-label { font-size: 11px; color: #888; }
+  .rate-btn.active .rate-label { color: rgba(255,255,255,0.75); }
+
+  .footer { text-align: center; font-size: 12px; color: #999; margin-top: 20px; padding-bottom: 20px; }
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+    .tax-rates { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>舊制不動產交易所得稅計算機</h1>
+  <p class="subtitle">適用於 2015 年 12 月 31 日以前取得之房屋</p>
+
+  <div class="note">
+    <strong>注意：</strong>舊制僅房屋交易所得課稅，土地交易所得免稅（但須繳土地增值稅）。
+    計算結果為「財產交易所得」，需併入年度綜合所得總額，按對應級距稅率課稅。
+    本計算機採用財政部 113 年度（2024 年）公告標準。
+  </div>
+
+  <div class="card">
+    <div class="card-title">基本資料</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>縣市</label>
+        <select id="city">
+          <option value="taipei">臺北市</option>
+          <option value="newtaipei">新北市</option>
+          <option value="taoyuan">桃園市</option>
+          <option value="hsinchu_city">新竹市</option>
+          <option value="hsinchu_county">新竹縣</option>
+          <option value="taichung">臺中市</option>
+          <option value="tainan">臺南市</option>
+          <option value="kaohsiung">高雄市</option>
+          <option value="other" selected>其他縣市</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>行政區</label>
+        <select id="district">
+          <option value="other">其他</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>房屋評定現值（元）</label>
+      <input type="number" id="houseValue" placeholder="例：2000000" value="2000000">
+    </div>
+    <div class="form-group">
+      <label>土地公告現值（元）</label>
+      <div class="hint">用於豪宅法計算房屋收入占比</div>
+      <input type="number" id="landValue" placeholder="例：10000000" value="10000000">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">計算方式</div>
+    <div class="method-selector">
+      <button class="method-btn active" data-method="actual">核實認定</button>
+      <button class="method-btn" data-method="luxury">豪宅標準法</button>
+      <button class="method-btn" data-method="standard">一般標準法</button>
+    </div>
+
+    <div class="method-section active" id="method-actual">
+      <div class="form-row">
+        <div class="form-group">
+          <label>房屋實際成交總價（元）</label>
+          <input type="number" id="salePrice" placeholder="房屋部分售價" value="50000000">
+        </div>
+        <div class="form-group">
+          <label>原始取得成本（元）</label>
+          <input type="number" id="costPrice" placeholder="房屋原始成本" value="30000000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>必要費用（元，仲介費、代書費、裝修費等）</label>
+        <input type="number" id="expenses" placeholder="例：500000" value="500000">
+      </div>
+      <div class="form-group" style="margin-top:10px;">
+        <label style="font-weight:400;font-size:13px;">
+          <input type="checkbox" id="useRatio" onchange="toggleRatioInput()">
+          買賣合約未分別載明房屋/土地價格，依比例計算房屋收入
+        </label>
+      </div>
+      <div id="ratioInput" style="display:none;" class="form-group">
+        <label>房屋收入占比（自動計算）</label>
+        <input type="text" id="ratioDisplay" readonly style="background:#f5f5f5;">
+      </div>
+    </div>
+
+    <div class="method-section" id="method-luxury">
+      <div class="note" style="background:#fff0e0;border-left-color:#e67e22;">
+        <strong>豪宅標準：</strong>無法舉證原始成本，且成交價或單價達一定門檻者。<br>
+        計算方式：成交總價 × (房屋評定現值 ÷ (房屋評定現值 + 土地公告現值)) × 20%
+      </div>
+      <div class="form-group">
+        <label>房地總成交金額（含車位，元）</label>
+        <input type="number" id="luxuryTotalPrice" placeholder="例：65000000" value="65000000">
+      </div>
+      <div class="form-group">
+        <label>權狀坪數（不含車位）</label>
+        <input type="number" id="luxuryPing" placeholder="例：45" value="45" step="0.1">
+      </div>
+      <div class="form-group">
+        <label>車位價格（元）</label>
+        <input type="number" id="luxuryParking" placeholder="例：3000000" value="3000000">
+      </div>
+    </div>
+
+    <div class="method-section" id="method-standard">
+      <div class="note" style="background:#e8f5e9;border-left-color:#4caf50;">
+        <strong>一般標準法：</strong>無法舉證原始成本，且未達豪宅門檻者。<br>
+        計算方式：房屋評定現值 × 區域所得額標準比率
+      </div>
+      <div class="form-group">
+        <label>區域所得額標準比率</label>
+        <input type="text" id="standardRate" readonly style="background:#f5f5f5;font-weight:700;font-size:16px;">
+      </div>
+      <div style="font-size:13px;color:#666;">
+        依所選縣市及行政區自動帶入財政部 113 年度公告比率。<br>
+        若無您的行政區，請手動輸入下方比率。
+      </div>
+      <div class="form-group" style="margin-top:10px;">
+        <label>自訂比率（%）</label>
+        <input type="number" id="customRate" placeholder="如無對應行政區請手動輸入" step="0.1" min="0" max="100">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">綜合所得稅級距</div>
+    <div style="font-size:13px;color:#666;margin-bottom:10px;">
+      選擇您適用的邊際稅率，或手動輸入：
+    </div>
+    <div class="tax-rates" id="taxRateSelector">
+      <div class="rate-btn active" data-rate="5"><div class="rate-pct">5%</div><div class="rate-label">0~59萬</div></div>
+      <div class="rate-btn" data-rate="12"><div class="rate-pct">12%</div><div class="rate-label">59~133萬</div></div>
+      <div class="rate-btn" data-rate="20"><div class="rate-pct">20%</div><div class="rate-label">133~266萬</div></div>
+      <div class="rate-btn" data-rate="30"><div class="rate-pct">30%</div><div class="rate-label">266~498萬</div></div>
+      <div class="rate-btn" data-rate="40"><div class="rate-pct">40%</div><div class="rate-label">498萬以上</div></div>
+    </div>
+    <div class="form-group">
+      <label>或自訂邊際稅率（%）</label>
+      <input type="number" id="customTaxRate" placeholder="例：20" value="20" step="0.1" min="0" max="100">
+    </div>
+  </div>
+
+  <div class="card result-box" id="resultBox">
+    <h3>計算結果</h3>
+    <div id="resultContent">
+      <div class="result-row">
+        <span class="label">財產交易所得（房屋部分）</span>
+        <span class="value" id="incomeAmount">-</span>
+      </div>
+      <div class="result-row">
+        <span class="label">適用邊際稅率</span>
+        <span class="value" id="taxRateDisplay">20%</span>
+      </div>
+      <div class="result-row total">
+        <span class="label">應納稅額</span>
+        <span class="value" id="taxAmount">-</span>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:#888;border-top:1px dashed #ccc;padding-top:10px;">
+        <div id="calcDetail"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    僅供參考，實際稅額請以國稅局核定為準
+  </div>
+</div>
+
+<script>
+const districtData = {
+  taipei: [
+    { value: '中山區', rate: 48 }, { value: '松山區', rate: 48 },
+    { value: '中正區', rate: 48 }, { value: '大安區', rate: 48 },
+    { value: '信義區', rate: 48 },
+    { value: '士林區', rate: 46 }, { value: '內湖區', rate: 46 },
+    { value: '大同區', rate: 46 }, { value: '南港區', rate: 46 },
+    { value: '北投區', rate: 45 }, { value: '萬華區', rate: 45 },
+    { value: '文山區', rate: 45 },
+  ],
+  newtaipei: [
+    { value: '板橋區', rate: 44 }, { value: '永和區', rate: 44 },
+    { value: '中和區', rate: 44 }, { value: '三重區', rate: 44 },
+    { value: '新店區', rate: 44 }, { value: '蘆洲區', rate: 44 },
+    { value: '新莊區', rate: 44 }, { value: '土城區', rate: 44 },
+    { value: '林口區', rate: 42 },
+    { value: '汐止區', rate: 41 }, { value: '樹林區', rate: 41 },
+    { value: '泰山區', rate: 36 },
+    { value: '五股區', rate: 34 }, { value: '三峽區', rate: 34 },
+    { value: '淡水區', rate: 29 },
+    { value: '八里區', rate: 27 },
+    { value: '鶯歌區', rate: 24 },
+    { value: '深坑區', rate: 23 },
+    { value: '金山區', rate: 19 }, { value: '三芝區', rate: 19 }, { value: '萬里區', rate: 19 },
+    { value: '瑞芳區', rate: 18 },
+    { value: '石碇區', rate: 14 }, { value: '烏來區', rate: 14 },
+    { value: '平溪區', rate: 14 }, { value: '坪林區', rate: 14 },
+    { value: '石門區', rate: 14 }, { value: '雙溪區', rate: 14 }, { value: '貢寮區', rate: 14 },
+  ],
+  taoyuan: [
+    { value: '桃園區', rate: 33 }, { value: '中壢區', rate: 33 },
+    { value: '龜山區', rate: 32 }, { value: '蘆竹區', rate: 32 }, { value: '八德區', rate: 32 },
+    { value: '平鎮區', rate: 26 },
+    { value: '大園區', rate: 24 },
+    { value: '龍潭區', rate: 23 }, { value: '楊梅區', rate: 23 }, { value: '大溪區', rate: 23 },
+    { value: '新屋區', rate: 18 },
+    { value: '觀音區', rate: 16 },
+    { value: '復興區', rate: 8 },
+  ],
+  hsinchu_city: [
+    { value: '東區', rate: 33 }, { value: '北區', rate: 33 }, { value: '香山區', rate: 33 },
+  ],
+  hsinchu_county: [
+    { value: '竹北市', rate: 33 },
+    { value: '竹東鎮', rate: 24 }, { value: '新埔鎮', rate: 21 },
+    { value: '關西鎮', rate: 17 }, { value: '湖口鄉', rate: 24 },
+    { value: '新豐鄉', rate: 24 }, { value: '芎林鄉', rate: 17 },
+    { value: '橫山鄉', rate: 15 }, { value: '北埔鄉', rate: 15 },
+    { value: '寶山鄉', rate: 24 }, { value: '峨眉鄉', rate: 14 },
+    { value: '尖石鄉', rate: 8 }, { value: '五峰鄉', rate: 8 },
+  ],
+  taichung: [
+    { value: '西屯區', rate: 35 }, { value: '南屯區', rate: 35 },
+    { value: '北屯區', rate: 32 }, { value: '西區', rate: 32 },
+    { value: '南區', rate: 30 }, { value: '北區', rate: 30 }, { value: '中區', rate: 30 },
+    { value: '東區', rate: 28 },
+    { value: '太平區', rate: 22 }, { value: '大里區', rate: 22 },
+    { value: '霧峰區', rate: 18 },
+    { value: '烏日區', rate: 20 },
+    { value: '豐原區', rate: 20 },
+    { value: '后里區', rate: 17 },
+    { value: '潭子區', rate: 22 }, { value: '大雅區', rate: 22 },
+    { value: '神岡區', rate: 17 },
+    { value: '東勢區', rate: 14 },
+    { value: '大甲區', rate: 17 },
+    { value: '沙鹿區', rate: 22 }, { value: '梧棲區', rate: 17 },
+    { value: '清水區', rate: 17 },
+    { value: '大肚區', rate: 17 },
+    { value: '龍井區', rate: 20 },
+    { value: '外埔區', rate: 14 },
+    { value: '大安區', rate: 11 }, { value: '新社區', rate: 11 },
+    { value: '石岡區', rate: 9 },
+    { value: '和平區', rate: 8 },
+  ],
+  tainan: [
+    { value: '新營區', rate: 20 },
+    { value: '鹽水區', rate: 14 },
+    { value: '白河區', rate: 14 },
+    { value: '麻豆區', rate: 18 },
+    { value: '佳里區', rate: 18 },
+    { value: '新化區', rate: 18 },
+    { value: '善化區', rate: 24 },
+    { value: '新市區', rate: 24 },
+    { value: '安定區', rate: 24 },
+    { value: '山上區', rate: 14 },
+    { value: '玉井區', rate: 14 },
+    { value: '楠西區', rate: 10 },
+    { value: '南化區', rate: 10 },
+    { value: '左鎮區', rate: 10 },
+    { value: '仁德區', rate: 24 },
+    { value: '歸仁區', rate: 24 },
+    { value: '關廟區', rate: 18 },
+    { value: '龍崎區', rate: 10 },
+    { value: '永康區', rate: 28 },
+    { value: '東區', rate: 28 }, { value: '南區', rate: 24 },
+    { value: '北區', rate: 24 }, { value: '中西區', rate: 28 },
+    { value: '安平區', rate: 28 },
+    { value: '安南區', rate: 24 },
+  ],
+  kaohsiung: [
+    { value: '鹽埕區', rate: 24 }, { value: '鼓山區', rate: 30 },
+    { value: '左營區', rate: 30 }, { value: '楠梓區', rate: 24 },
+    { value: '三民區', rate: 30 }, { value: '新興區', rate: 24 },
+    { value: '前金區', rate: 24 }, { value: '苓雅區', rate: 30 },
+    { value: '前鎮區', rate: 24 }, { value: '旗津區', rate: 17 },
+    { value: '小港區', rate: 24 },
+    { value: '鳳山區', rate: 28 },
+    { value: '林園區', rate: 17 },
+    { value: '大寮區', rate: 19 },
+    { value: '大樹區', rate: 14 },
+    { value: '大社區', rate: 19 },
+    { value: '仁武區', rate: 24 },
+    { value: '鳥松區', rate: 24 },
+    { value: '岡山區', rate: 22 },
+    { value: '橋頭區', rate: 22 },
+    { value: '燕巢區', rate: 14 },
+    { value: '田寮區', rate: 10 },
+    { value: '阿蓮區', rate: 14 },
+    { value: '路竹區', rate: 17 },
+    { value: '湖內區', rate: 17 },
+    { value: '茄萣區', rate: 17 },
+    { value: '永安區', rate: 14 },
+    { value: '彌陀區', rate: 14 },
+    { value: '梓官區', rate: 19 },
+    { value: '旗山區', rate: 14 },
+    { value: '美濃區', rate: 10 },
+    { value: '六龜區', rate: 10 },
+    { value: '甲仙區', rate: 8 },
+    { value: '杉林區', rate: 8 },
+    { value: '內門區', rate: 10 },
+    { value: '茂林區', rate: 8 },
+    { value: '桃源區', rate: 8 },
+    { value: '那瑪夏區', rate: 8 },
+  ],
+  other: [],
+};
+
+const luxuryThresholds = {
+  taipei:     { total: 60000000, unit: 1200000 },
+  newtaipei:  { total: 40000000, unit: 750000 },
+  taoyuan:    { total: 30000000, unit: 500000 },
+  hsinchu_city:   { total: 30000000, unit: 500000 },
+  hsinchu_county: { total: 30000000, unit: 500000 },
+  taichung:   { total: 30000000, unit: 500000 },
+  tainan:     { total: 30000000, unit: 500000 },
+  kaohsiung:  { total: 30000000, unit: 500000 },
+  other:      { total: 22000000, unit: 350000 },
+};
+
+const cityLabels = {
+  taipei: '臺北市', newtaipei: '新北市', taoyuan: '桃園市',
+  hsinchu_city: '新竹市', hsinchu_county: '新竹縣',
+  taichung: '臺中市', tainan: '臺南市', kaohsiung: '高雄市', other: '其他縣市',
+};
+
+let activeMethod = 'actual';
+let selectedTaxRate = 20;
+
+function toggleRatioInput() {
+  const checked = document.getElementById('useRatio').checked;
+  document.getElementById('ratioInput').style.display = checked ? 'block' : 'none';
+  calc();
+}
+
+function populateDistricts() {
+  const city = document.getElementById('city').value;
+  const sel = document.getElementById('district');
+  const currentVal = sel.value;
+  sel.innerHTML = '';
+  const list = districtData[city] || [];
+  if (list.length === 0) {
+    const opt = document.createElement('option');
+    opt.value = 'other';
+    opt.textContent = '（無對應行政區，請自訂比率）';
+    sel.appendChild(opt);
+  } else {
+    const def = document.createElement('option');
+    def.value = '';
+    def.textContent = '— 請選擇行政區 —';
+    sel.appendChild(def);
+    list.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.value;
+      opt.textContent = `${d.value}（${d.rate}%）`;
+      opt.dataset.rate = d.rate;
+      sel.appendChild(opt);
+    });
+  }
+  if ([...sel.options].some(o => o.value === currentVal)) {
+    sel.value = currentVal;
+  }
+  updateStandardRate();
+}
+
+function updateStandardRate() {
+  const city = document.getElementById('city').value;
+  const district = document.getElementById('district');
+  const rateDisplay = document.getElementById('standardRate');
+  const selectedOpt = district.options[district.selectedIndex];
+
+  if (districtData[city] && districtData[city].length > 0 && selectedOpt && selectedOpt.dataset && selectedOpt.dataset.rate) {
+    rateDisplay.value = `${selectedOpt.dataset.rate}%（${selectedOpt.value}）`;
+  } else {
+    const custom = document.getElementById('customRate').value;
+    if (custom) {
+      rateDisplay.value = `自訂 ${custom}%`;
+    } else {
+      rateDisplay.value = '請選擇行政區或輸入自訂比率';
+    }
+  }
+  calc();
+}
+
+function setupMethodButtons() {
+  document.querySelectorAll('.method-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.method-section').forEach(s => s.classList.remove('active'));
+      activeMethod = btn.dataset.method;
+      document.getElementById('method-' + activeMethod).classList.add('active');
+      calc();
+    });
+  });
+}
+
+function setupTaxRateButtons() {
+  document.querySelectorAll('.rate-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.rate-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedTaxRate = parseFloat(btn.dataset.rate);
+      document.getElementById('customTaxRate').value = selectedTaxRate;
+      calc();
+    });
+  });
+}
+
+function formatMoney(n) {
+  return '$' + Math.round(n).toLocaleString('en-US');
+}
+
+function calc() {
+  const houseValue = parseFloat(document.getElementById('houseValue').value) || 0;
+  const landValue = parseFloat(document.getElementById('landValue').value) || 0;
+  const customTax = parseFloat(document.getElementById('customTaxRate').value);
+  if (!isNaN(customTax) && customTax >= 0) {
+    selectedTaxRate = customTax;
+    document.querySelectorAll('.rate-btn').forEach(b => {
+      b.classList.toggle('active', Math.abs(parseFloat(b.dataset.rate) - selectedTaxRate) < 0.01);
+    });
+  }
+
+  let income = 0;
+  let detail = '';
+
+  if (activeMethod === 'actual') {
+    const salePrice = parseFloat(document.getElementById('salePrice').value) || 0;
+    const costPrice = parseFloat(document.getElementById('costPrice').value) || 0;
+    const expenses = parseFloat(document.getElementById('expenses').value) || 0;
+    const useRatio = document.getElementById('useRatio').checked;
+
+    if (useRatio) {
+      const total = houseValue + landValue;
+      const ratio = total > 0 ? houseValue / total : 0;
+      document.getElementById('ratioDisplay').value = (ratio * 100).toFixed(2) + '%（房屋評定現值 ÷ 房地現值總和）';
+      income = (salePrice - costPrice - expenses) * ratio;
+      detail = `(售價 ${formatMoney(salePrice)} - 成本 ${formatMoney(costPrice)} - 費用 ${formatMoney(expenses)}) × 房屋占比 ${(ratio*100).toFixed(2)}% = ${formatMoney(income)}`;
+    } else {
+      income = salePrice - costPrice - expenses;
+      detail = `售價 ${formatMoney(salePrice)} - 成本 ${formatMoney(costPrice)} - 費用 ${formatMoney(expenses)} = ${formatMoney(income)}`;
+    }
+  } else if (activeMethod === 'luxury') {
+    const totalPrice = parseFloat(document.getElementById('luxuryTotalPrice').value) || 0;
+    const parking = parseFloat(document.getElementById('luxuryParking').value) || 0;
+    const ping = parseFloat(document.getElementById('luxuryPing').value) || 0;
+
+    const total = houseValue + landValue;
+    const ratio = total > 0 ? houseValue / total : 0;
+    income = totalPrice * ratio * 0.2;
+    detail = `成交總價 ${formatMoney(totalPrice)} × 房屋占比 ${(ratio*100).toFixed(2)}% × 20% = ${formatMoney(income)}`;
+  } else if (activeMethod === 'standard') {
+    const custom = parseFloat(document.getElementById('customRate').value);
+    const district = document.getElementById('district');
+    const selectedOpt = district.options[district.selectedIndex];
+    let rate = null;
+
+    if (selectedOpt && selectedOpt.dataset && selectedOpt.dataset.rate) {
+      rate = parseFloat(selectedOpt.dataset.rate);
+    }
+    if (rate === null && !isNaN(custom) && custom > 0) {
+      rate = custom;
+    }
+
+    if (rate !== null) {
+      income = houseValue * (rate / 100);
+      detail = `房屋評定現值 ${formatMoney(houseValue)} × ${rate}% = ${formatMoney(income)}`;
+    } else {
+      income = 0;
+      detail = '請選擇行政區或輸入自訂比率';
+    }
+  }
+
+  const tax = income * (selectedTaxRate / 100);
+
+  document.getElementById('incomeAmount').textContent = formatMoney(income);
+  document.getElementById('taxRateDisplay').textContent = selectedTaxRate + '%';
+  document.getElementById('taxAmount').textContent = formatMoney(tax);
+  document.getElementById('calcDetail').innerHTML = 
+    '<strong>計算過程：</strong><br>' + detail + 
+    '<br><strong>應納稅額：</strong>' + formatMoney(income) + ' × ' + selectedTaxRate + '% = ' + formatMoney(tax);
+}
+
+document.getElementById('city').addEventListener('change', () => {
+  populateDistricts();
+  calc();
+});
+document.getElementById('district').addEventListener('change', () => {
+  updateStandardRate();
+  calc();
+});
+
+document.querySelectorAll('input').forEach(el => {
+  el.addEventListener('input', calc);
+});
+
+document.getElementById('customRate').addEventListener('input', () => {
+  updateStandardRate();
+  calc();
+});
+
+document.getElementById('customTaxRate').addEventListener('input', () => {
+  calc();
+});
+
+toggleRatioInput();
+setupMethodButtons();
+setupTaxRateButtons();
+populateDistricts();
+calc();
+</script>
+</body>
+</html>
