@@ -344,8 +344,7 @@ document.getElementById('fs-btn').addEventListener('click', () => {
   else document.exitFullscreen();
 });
 document.getElementById('back-btn').addEventListener('click', () => {
-  destroyViewer();
-  location.reload();
+  history.back();
 });
 </script>
 </body>
