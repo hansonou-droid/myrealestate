@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>舊制不動產財產交易所得稅試算</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #1c2330;
+  --border: #30363d;
+  --accent: #f0883e;
+  --accent2: #58a6ff;
+  --green: #3fb950;
+  --red: #f85149;
+  --text: #e6edf3;
+  --text2: #8b949e;
+  --text3: #484f58;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html { font-size: 16px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans TC', sans-serif;
+  min-height: 100dvh;
+  padding-bottom: 2rem;
+}
+
+/* ─── TOP BAR ─── */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.25rem 0.9rem;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.topbar-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.2rem;
+}
+
+.topbar-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  line-height: 1.15;
+}
+
+/* ─── TAB STRIP ─── */
+.tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  gap: 0;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex-shrink: 0;
+  padding: 0.7rem 1.1rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ─── PANELS ─── */
+.panel { display: none; padding: 1rem 1rem 0; }
+.panel.active { display: block; }
+
+/* ─── SECTION LABEL ─── */
+.sec-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 0.3rem 0 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* ─── INPUT GROUP ─── */
+.field {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.6rem;
+  position: relative;
+  transition: border-color 0.2s;
+}
+
+.field:focus-within { border-color: var(--accent2); }
+
+.field label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text2);
+  margin-bottom: 0.35rem;
+  font-weight: 500;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.field input, .field select {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  -moz-appearance: textfield;
+  min-width: 0;
+}
+
+.field select {
+  font-size: 0.92rem;
+  font-family: 'Noto Sans TC', sans-serif;
+  cursor: pointer;
+}
+
+.field select option { background: var(--surface2); }
+
+.field input::-webkit-inner-spin-button,
+.field input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+.field input::placeholder { color: var(--text3); }
+
+.unit {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--text3);
+  flex-shrink: 0;
+}
+
+/* toggle */
+.toggle-wrap {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 0.6rem;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 0.7rem 0.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  background: transparent;
+}
+
+.toggle-btn.active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ─── CALC BUTTON ─── */
+.calc-btn {
+  display: block;
+  width: 100%;
+  margin: 1.1rem 0 1.5rem;
+  padding: 1rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  -webkit-appearance: none;
+}
+
+.calc-btn:active { opacity: 0.85; transform: scale(0.98); }
+
+/* ─── RESULT CARDS ─── */
+.result-area {
+  display: none;
+  animation: fadeUp 0.35s ease both;
+}
+
+.result-area.show { display: block; }
+
+.result-hero {
+  background: linear-gradient(135deg, #f0883e22, #f0883e08);
+  border: 1px solid #f0883e44;
+  border-radius: var(--radius);
+  padding: 1.25rem 1.25rem 1rem;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.result-hero-label {
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  font-family: 'Barlow Condensed', sans-serif;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.result-hero-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+
+.result-hero-sub {
+  font-size: 0.72rem;
+  color: var(--text2);
+  margin-top: 0.3rem;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.rcard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+}
+
+.rcard-label {
+  font-size: 0.65rem;
+  color: var(--text2);
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+
+.rcard-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.rcard-val.green { color: var(--green); }
+.rcard-val.red { color: var(--red); }
+.rcard-val.blue { color: var(--accent2); }
+
+/* Steps */
+.steps-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.steps-header {
+  padding: 0.75rem 1rem;
+  background: var(--surface2);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: var(--text2);
+  font-family: 'Barlow Condensed', sans-serif;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+.step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.83rem;
+}
+
+.step-row:last-child { border-bottom: none; }
+
+.step-num {
+  background: var(--accent);
+  color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.step-content { flex: 1; min-width: 0; }
+.step-desc { color: var(--text2); font-size: 0.75rem; line-height: 1.5; }
+.step-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--accent2);
+  margin-top: 0.15rem;
+}
+
+/* Tax rate table */
+.rate-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.rate-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.rate-table-wrap th {
+  background: var(--surface2);
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--text2);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+
+.rate-table-wrap td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid #1c2330;
+  color: var(--text);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.85rem;
+}
+
+.rate-table-wrap tr:last-child td { border-bottom: none; }
+.rate-table-wrap tr.highlight-row td { background: #f0883e18; color: var(--accent); font-weight: 600; }
+
+/* Note box */
+.note-box {
+  background: #58a6ff10;
+  border: 1px solid #58a6ff30;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-size: 0.75rem;
+  color: var(--text2);
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+.note-box strong { color: var(--accent2); }
+
+/* Error */
+.err-box {
+  display: none;
+  background: #f8514910;
+  border: 1px solid #f8514940;
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  font-size: 0.8rem;
+  color: var(--red);
+  margin-bottom: 0.75rem;
+}
+
+.err-box.show { display: block; }
+
+/* Info tab */
+.info-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 0.6rem;
+}
+
+.info-block summary {
+  padding: 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text);
+}
+
+.info-block summary::after {
+  content: '›';
+  font-size: 1.2rem;
+  color: var(--text3);
+  transition: transform 0.2s;
+}
+
+.info-block[open] summary::after { transform: rotate(90deg); }
+
+.info-block-body {
+  padding: 0 1rem 1rem;
+  font-size: 0.78rem;
+  color: var(--text2);
+  line-height: 1.7;
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+
+.info-block-body b { color: var(--accent); }
+.info-block-body code {
+  background: var(--surface2);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.75rem;
+  color: var(--green);
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Income tax bracket table */
+.bracket-pill {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-tag">財產交易所得稅試算</div>
+  <div class="topbar-title">舊制不動產交易所得稅</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('calc')">📊 試算</div>
+  <div class="tab" onclick="switchTab('info')">📖 說明</div>
+</div>
+
+<!-- ════ CALC PANEL ════ -->
+<div class="panel active" id="panel-calc">
+
+  <!-- 計算方式 -->
+  <div class="sec-label">計算方式</div>
+  <div class="toggle-wrap">
+    <button class="toggle-btn active" onclick="setMethod('actual')" id="btn-actual">✅ 核實計算<br><span style="font-size:.65rem;font-weight:400">有原始成本</span></button>
+    <button class="toggle-btn" onclick="setMethod('estimated')" id="btn-estimated">📐 設算計算<br><span style="font-size:.65rem;font-weight:400">無原始成本</span></button>
+  </div>
+
+  <!-- 核實計算輸入 -->
+  <div id="actual-inputs">
+    <div class="sec-label">出售資訊</div>
+
+    <div class="field">
+      <label>房地出售總價款</label>
+      <div class="field-row">
+        <input type="number" id="sell-price" placeholder="例：15000000" inputmode="numeric">
+        <span class="unit">元</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>出售時房屋評定現值</label>
+      <div class="field-row">
+        <input type="number" id="sell-house-val" placeholder="例：800000" inputmode="numeric">
+        <span class="unit">元</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>出售時土地公告現值</label>
+      <div class="field-row">
+        <input type="number" id="sell-land-val" placeholder="例：3000000" inputmode="numeric">
+        <span class="unit">元</span>
+      </div>
+    </div>
+
+    <div class="sec-label">取得成本</div>
+
+    <div class="field">
+      <label>原始取得房地總成本（買入價格）</label>
+      <div class="field-row">
+        <input type="number" id="buy-price" placeholder="例：8000000" inputmode="numeric">
+        <span class="unit">元</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>取得及出售之相關費用合計<br><span style="font-size:.67rem;color:var(--text3)">仲介費、代書費、土地增值稅、契稅、修繕費等</span></label>
+      <div class="field-row">
+        <input type="number" id="expenses" placeholder="例：500000" inputmode="numeric">
+        <span class="unit">元</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 設算計算輸入 -->
+  <div id="estimated-inputs" style="display:none">
+    <div class="sec-label">房屋所在地區</div>
+
+    <div class="field">
+      <label>地區</label>
+      <div class="field-row">
+        <select id="region" onchange="updateEstPct()">
+          <option value="">── 請選擇地區 ──</option>
+          <optgroup label="高價住宅判斷（總成交金額門檻）">
+            <option value="taipei-high">臺北市（高價：6,000萬↑ 或 120萬/坪↑）</option>
+            <option value="newTaipei-high">新北市（高價：4,000萬↑ 或 75萬/坪↑）</option>
+            <option value="sixCity-high">桃竹中南高（高價：3,000萬↑ 或 50萬/坪↑）</option>
+            <option value="other-high">其他地區（高價：2,200萬↑ 或 35萬/坪↑）</option>
+          </optgroup>
+          <optgroup label="非高價住宅（設算比例，依地段）">
+            <option value="taipei-a">臺北市精華區（65%）</option>
+            <option value="taipei-b">臺北市一般區（55%）</option>
+            <option value="newTaipei-a">新北市精華區（55%）</option>
+            <option value="newTaipei-b">新北市一般區（44%）</option>
+            <option value="hsinchu-a">新竹縣竹北市（51%）</option>
+            <option value="taichung-a">臺中市精華區（45%）</option>
+            <option value="taichung-b">臺中市一般區（38%）</option>
+            <option value="tainan-a">臺南市精華區（35%）</option>
+            <option value="kaohsiung-a">高雄市精華區（35%）</option>
+            <option value="others-30">其他主要都市（30%）</option>
+            <option value="others-25">一般鄉鎮市（25%）</option>
+            <option value="others-20">偏遠地區（20%）</option>
+            <option value="others-15">山地偏遠（15%）</option>
+            <option value="others-13">其他低價區（13%）</option>
+            <option value="custom">自訂比例</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+
+    <!-- 高價住宅路徑 -->
+    <div id="high-price-inputs" style="display:none">
+      <div class="note-box">
+        <strong>高價住宅計算方式：</strong><br>
+        財產交易所得 = 房地總成交金額 × <strong>房屋評定現值比例</strong> × <strong>20%</strong>
+      </div>
+
+      <div class="field">
+        <label>房地出售總價款（含車位）</label>
+        <div class="field-row">
+          <input type="number" id="high-sell" placeholder="例：70000000" inputmode="numeric">
+          <span class="unit">元</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>出售時房屋評定現值</label>
+        <div class="field-row">
+          <input type="number" id="high-house-val" placeholder="例：3000000" inputmode="numeric">
+          <span class="unit">元</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>出售時土地公告現值</label>
+        <div class="field-row">
+          <input type="number" id="high-land-val" placeholder="例：8000000" inputmode="numeric">
+          <span class="unit">元</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 非高價住宅路徑 -->
+    <div id="normal-est-inputs" style="display:none">
+      <div id="custom-pct-wrap" style="display:none">
+        <div class="field">
+          <label>自訂設算比例（%）</label>
+          <div class="field-row">
+            <input type="number" id="custom-pct" placeholder="例：44" min="1" max="100" inputmode="decimal">
+            <span class="unit">%</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="est-pct-display" class="note-box" style="display:none">
+        財政部公告設算比例：<strong id="pct-label">—</strong>
+        <br>財產交易所得 = 房屋評定現值 × 比例
+      </div>
+
+      <div class="field">
+        <label>出售時房屋評定現值</label>
+        <div class="field-row">
+          <input type="number" id="est-house-val" placeholder="例：800000" inputmode="numeric">
+          <span class="unit">元</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 綜合所得稅資訊 -->
+  <div class="sec-label">申報綜合所得稅</div>
+
+  <div class="field">
+    <label>其他綜合所得總額（薪資等）</label>
+    <div class="field-row">
+      <input type="number" id="other-income" placeholder="例：1200000" inputmode="numeric">
+      <span class="unit">元</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>免稅額合計</label>
+    <div class="field-row">
+      <input type="number" id="exemption" placeholder="例：97000（本人）" inputmode="numeric" value="97000">
+      <span class="unit">元</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>扣除額合計（標扣或列舉）</label>
+    <div class="field-row">
+      <input type="number" id="deduction" placeholder="例：124000（標準扣除額）" inputmode="numeric" value="124000">
+      <span class="unit">元</span>
+    </div>
+  </div>
+
+  <div class="err-box" id="errBox"></div>
+
+  <button class="calc-btn" onclick="calculate()">▶ 開始試算</button>
+
+  <!-- ─ RESULT ─ -->
+  <div class="result-area" id="resultArea">
+
+    <div class="result-hero">
+      <div class="result-hero-label">財產交易所得</div>
+      <div class="result-hero-val" id="r-income">—</div>
+      <div class="result-hero-sub">此金額併入綜合所得稅申報</div>
+    </div>
+
+    <div class="result-grid">
+      <div class="rcard">
+        <div class="rcard-label">綜合所得總額</div>
+        <div class="rcard-val blue" id="r-total-income">—</div>
+      </div>
+      <div class="rcard">
+        <div class="rcard-label">課稅所得額</div>
+        <div class="rcard-val" id="r-taxable">—</div>
+      </div>
+      <div class="rcard">
+        <div class="rcard-label">適用稅率</div>
+        <div class="rcard-val" id="r-rate">—</div>
+      </div>
+      <div class="rcard">
+        <div class="rcard-label">應納稅額</div>
+        <div class="rcard-val red" id="r-tax">—</div>
+      </div>
+    </div>
+
+    <!-- 計算步驟 -->
+    <div class="steps-box">
+      <div class="steps-header">計算步驟明細</div>
+      <div id="steps-content"></div>
+    </div>
+
+    <!-- 稅率對照 -->
+    <div class="rate-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>課稅所得</th>
+            <th>稅率</th>
+            <th>累進差額</th>
+          </tr>
+        </thead>
+        <tbody id="rate-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="note-box">
+      <strong>⚠ 注意事項：</strong><br>
+      • 本試算僅供參考，實際應納稅額以國稅局核定為準。<br>
+      • 舊制房屋係指 <strong>104年12月31日以前取得</strong>之房屋。<br>
+      • 土地交易所得免納綜合所得稅（僅課土地增值稅）。<br>
+      • 建議申報前諮詢專業會計師或稅務人員。
+    </div>
+
+  </div>
+</div>
+
+<!-- ════ INFO PANEL ════ -->
+<div class="panel" id="panel-info">
+
+  <div class="sec-label">制度概要</div>
+
+  <details class="info-block">
+    <summary>什麼是舊制？適用條件</summary>
+    <div class="info-block-body">
+      <b>舊制</b>指 <b>民國104年12月31日以前</b>取得之房屋。自105年1月1日起取得者適用新制（房地合一稅）。<br><br>
+      舊制之<b>土地交易所得免課所得稅</b>，僅房屋財產交易所得須計入個人綜合所得稅。土地部分仍課徵<b>土地增值稅</b>。
+    </div>
+  </details>
+
+  <details class="info-block">
+    <summary>核實計算公式</summary>
+    <div class="info-block-body">
+      當能提供原始取得成本時，應<b>核實計算</b>：<br><br>
+      <b>房屋財產交易所得</b> =<br>
+      <code>（出售總價 − 買入總成本 − 相關費用）× 出售時房屋評定現值 ÷ （房屋評定現值 + 土地公告現值）</code><br><br>
+      相關費用包含：仲介費、代書費、土地增值稅、契稅、修繕費等有憑證之必要費用。
+    </div>
+  </details>
+
+  <details class="info-block">
+    <summary>設算計算規定（114年度）</summary>
+    <div class="info-block-body">
+      無法提供原始成本時，依財政部公告標準設算：<br><br>
+      <b>① 高價住宅</b>（成交金額達門檻）：<br>
+      <code>所得 = 出售總額 × 房屋評定現值比例 × 20%</code><br><br>
+      高價門檻：臺北市 6,000萬↑、新北市 4,000萬↑、六都 3,000萬↑、其他 2,200萬↑<br><br>
+      <b>② 非高價住宅</b>：<br>
+      <code>所得 = 房屋評定現值 × 地區設算比例</code><br><br>
+      設算比例視所在鄉鎮市區而定，約 8%～65% 不等（依財政部每年公告）。
+    </div>
+  </details>
+
+  <details class="info-block">
+    <summary>114年度綜合所得稅稅率表</summary>
+    <div class="info-block-body">
+      課稅所得額適用累進稅率：<br><br>
+      • 0 ～ 59 萬：<b>5%</b>，差額 0<br>
+      • 59 ～ 133 萬：<b>12%</b>，差額 4.13 萬<br>
+      • 133 ～ 266 萬：<b>20%</b>，差額 14.77 萬<br>
+      • 266 ～ 498 萬：<b>30%</b>，差額 41.37 萬<br>
+      • 498 萬以上：<b>40%</b>，差額 91.17 萬<br><br>
+      應納稅額 = 課稅所得 × 稅率 − 累進差額
+    </div>
+  </details>
+
+  <details class="info-block">
+    <summary>申報時間與注意事項</summary>
+    <div class="info-block-body">
+      • 財產交易所得歸屬年度：以<b>房屋所有權移轉登記日</b>所屬年度為準。<br>
+      • 每年 5 月 1 日～6 月 30 日辦理結算申報。<br>
+      • 出售房屋時，建議保留買賣契約、仲介收據、代書費收據、土地增值稅繳款書等原始憑證，以供核實計算。<br>
+      • 如所得為損失（賣出 &lt; 買入），可自其他財產交易所得中扣除，但<b>不得自其他類別所得中扣除</b>。
+    </div>
+  </details>
+
+</div>
+
+<script>
+// ─── 稅率表（114年度，萬元為單位）
+const BRACKETS = [
+  { limit: 590000,   rate: 0.05, diff: 0       },
+  { limit: 1330000,  rate: 0.12, diff: 41300   },
+  { limit: 2660000,  rate: 0.20, diff: 147700  },
+  { limit: 4980000,  rate: 0.30, diff: 413700  },
+  { limit: Infinity, rate: 0.40, diff: 911700  },
+];
+
+const RATE_LABELS = [
+  ['0 ～ 59萬',    '5%',  '0'],
+  ['59 ～ 133萬',  '12%', '4.13萬'],
+  ['133 ～ 266萬', '20%', '14.77萬'],
+  ['266 ～ 498萬', '30%', '41.37萬'],
+  ['498萬以上',    '40%', '91.17萬'],
+];
+
+// 設算比例對應
+const EST_PCT = {
+  'taipei-a':   65, 'taipei-b':   55,
+  'newTaipei-a':55, 'newTaipei-b':44,
+  'hsinchu-a':  51,
+  'taichung-a': 45, 'taichung-b': 38,
+  'tainan-a':   35, 'kaohsiung-a':35,
+  'others-30':  30, 'others-25':  25,
+  'others-20':  20, 'others-15':  15,
+  'others-13':  13,
+};
+
+let method = 'actual';
+
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', ['calc','info'][i] === t));
+  document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
+  document.getElementById('panel-' + t).classList.add('active');
+}
+
+function setMethod(m) {
+  method = m;
+  document.getElementById('btn-actual').classList.toggle('active', m === 'actual');
+  document.getElementById('btn-estimated').classList.toggle('active', m === 'estimated');
+  document.getElementById('actual-inputs').style.display = m === 'actual' ? '' : 'none';
+  document.getElementById('estimated-inputs').style.display = m === 'estimated' ? '' : 'none';
+  hideResult();
+}
+
+function updateEstPct() {
+  const val = document.getElementById('region').value;
+  const highPriceInputs = document.getElementById('high-price-inputs');
+  const normalInputs = document.getElementById('normal-est-inputs');
+  const customWrap = document.getElementById('custom-pct-wrap');
+  const pctDisplay = document.getElementById('est-pct-display');
+
+  const isHigh = val.endsWith('-high');
+  const isCustom = val === 'custom';
+  const isNormal = !isHigh && val !== '';
+
+  highPriceInputs.style.display = isHigh ? '' : 'none';
+  normalInputs.style.display = isNormal ? '' : 'none';
+  customWrap.style.display = isCustom ? '' : 'none';
+  pctDisplay.style.display = (isNormal && !isCustom) ? '' : 'none';
+
+  if (isNormal && !isCustom) {
+    document.getElementById('pct-label').textContent = EST_PCT[val] + '%';
+  }
+}
+
+function hideResult() {
+  document.getElementById('resultArea').classList.remove('show');
+  document.getElementById('errBox').classList.remove('show');
+}
+
+function showErr(msg) {
+  const b = document.getElementById('errBox');
+  b.textContent = '⚠ ' + msg;
+  b.classList.add('show');
+}
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('zh-TW') + ' 元';
+}
+
+function calcTax(taxable) {
+  for (const b of BRACKETS) {
+    if (taxable <= b.limit) {
+      return { tax: taxable * b.rate - b.diff, rate: b.rate, diff: b.diff };
+    }
+  }
+}
+
+function addStep(container, num, desc, val) {
+  const el = document.createElement('div');
+  el.className = 'step-row';
+  el.innerHTML = `
+    <div class="step-num">${num}</div>
+    <div class="step-content">
+      <div class="step-desc">${desc}</div>
+      <div class="step-val">${val}</div>
+    </div>`;
+  container.appendChild(el);
+}
+
+function renderRateTable(taxableIncome) {
+  const tbody = document.getElementById('rate-tbody');
+  tbody.innerHTML = '';
+  let applied = -1;
+  for (let i = 0; i < BRACKETS.length; i++) {
+    if (taxableIncome <= BRACKETS[i].limit) { applied = i; break; }
+  }
+  RATE_LABELS.forEach((row, i) => {
+    const tr = document.createElement('tr');
+    if (i === applied) tr.className = 'highlight-row';
+    tr.innerHTML = `<td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function calculate() {
+  document.getElementById('errBox').classList.remove('show');
+  const otherIncome = parseFloat(document.getElementById('other-income').value) || 0;
+  const exemption   = parseFloat(document.getElementById('exemption').value)   || 0;
+  const deduction   = parseFloat(document.getElementById('deduction').value)   || 0;
+
+  let propIncome = 0;
+  const steps = document.getElementById('steps-content');
+  steps.innerHTML = '';
+  let stepN = 1;
+
+  // ─ ACTUAL
+  if (method === 'actual') {
+    const sellPrice   = parseFloat(document.getElementById('sell-price').value);
+    const houseVal    = parseFloat(document.getElementById('sell-house-val').value);
+    const landVal     = parseFloat(document.getElementById('sell-land-val').value);
+    const buyPrice    = parseFloat(document.getElementById('buy-price').value);
+    const expenses    = parseFloat(document.getElementById('expenses').value) || 0;
+
+    if (!sellPrice || !houseVal || !landVal || !buyPrice) return showErr('請填寫所有必要欄位（出售總價、評定現值、公告現值、買入成本）');
+    if (houseVal + landVal <= 0) return showErr('房屋評定現值與土地公告現值之和不能為零');
+
+    const ratio = houseVal / (houseVal + landVal);
+    const netGain = sellPrice - buyPrice - expenses;
+    propIncome = netGain * ratio;
+
+    addStep(steps, stepN++, '出售總價 − 買入成本 − 相關費用', fmt(netGain));
+    addStep(steps, stepN++, `房屋評定現值比例（${houseVal.toLocaleString()} ÷ ${(houseVal+landVal).toLocaleString()}）`, (ratio*100).toFixed(2) + '%');
+    addStep(steps, stepN++, '房屋財產交易所得 = 差額 × 比例', fmt(propIncome));
+
+  // ─ ESTIMATED
+  } else {
+    const region = document.getElementById('region').value;
+    if (!region) return showErr('請選擇地區');
+
+    const isHigh = region.endsWith('-high');
+    const isCustom = region === 'custom';
+
+    if (isHigh) {
+      const highSell  = parseFloat(document.getElementById('high-sell').value);
+      const highHouse = parseFloat(document.getElementById('high-house-val').value);
+      const highLand  = parseFloat(document.getElementById('high-land-val').value);
+      if (!highSell || !highHouse || !highLand) return showErr('請填入出售總價、房屋評定現值、土地公告現值');
+
+      const ratio = highHouse / (highHouse + highLand);
+      const houseRev = highSell * ratio;
+      propIncome = houseRev * 0.20;
+
+      addStep(steps, stepN++, '房屋評定現值比例', (ratio*100).toFixed(2) + '%');
+      addStep(steps, stepN++, '歸屬房屋收入 = 出售總額 × 比例', fmt(houseRev));
+      addStep(steps, stepN++, '財產交易所得 = 房屋收入 × 20%', fmt(propIncome));
+
+    } else {
+      const estHouseVal = parseFloat(document.getElementById('est-house-val').value);
+      if (!estHouseVal) return showErr('請填入出售時房屋評定現值');
+
+      let pct;
+      if (isCustom) {
+        pct = parseFloat(document.getElementById('custom-pct').value);
+        if (!pct || pct <= 0 || pct > 100) return showErr('請輸入正確的自訂比例（1～100）');
+      } else {
+        pct = EST_PCT[region];
+      }
+
+      propIncome = estHouseVal * pct / 100;
+      addStep(steps, stepN++, '設算比例', pct + '%');
+      addStep(steps, stepN++, '財產交易所得 = 房屋評定現值 × 比例', fmt(propIncome));
+    }
+  }
+
+  // ─ 綜所稅計算
+  const totalIncome = otherIncome + propIncome;
+  const taxable = Math.max(0, totalIncome - exemption - deduction);
+  const { tax, rate } = calcTax(taxable);
+
+  addStep(steps, stepN++, '加計其他所得 → 綜合所得總額', fmt(totalIncome));
+  addStep(steps, stepN++, '減免稅額、扣除額後課稅所得額', fmt(taxable));
+  addStep(steps, stepN++, `應納稅額（稅率 ${(rate*100).toFixed(0)}%）`, fmt(Math.max(0, tax)));
+
+  // ─ 顯示
+  document.getElementById('r-income').textContent = fmt(propIncome);
+  document.getElementById('r-total-income').textContent = fmt(totalIncome);
+  document.getElementById('r-taxable').textContent = fmt(taxable);
+  document.getElementById('r-rate').innerHTML = `<span class="bracket-pill">${(rate*100).toFixed(0)}%</span>`;
+  document.getElementById('r-tax').textContent = fmt(Math.max(0, tax));
+
+  renderRateTable(taxable);
+  document.getElementById('resultArea').classList.add('show');
+  document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>

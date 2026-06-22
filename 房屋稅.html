@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>房屋稅試算工具</title>
+<style>
+  :root {
+    --navy: #1B3A6B;
+    --navy-light: #2A5298;
+    --gold: #C9973A;
+    --gold-light: #F0C96B;
+    --bg: #EEF1F7;
+    --card: #FFFFFF;
+    --text: #1A1A2E;
+    --muted: #6B7A99;
+    --border: #D6DCE9;
+    --red: #E05B5B;
+    --green: #3A8A5E;
+    --radius: 14px;
+    --shadow: 0 4px 20px rgba(27,58,107,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--navy);
+    padding: 20px 20px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(201,151,58,0.15);
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -50px; left: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(42,82,152,0.3);
+  }
+  .header-inner { position: relative; z-index: 1; }
+  .header-badge {
+    display: inline-block;
+    background: rgba(201,151,58,0.2);
+    border: 1px solid rgba(201,151,58,0.5);
+    color: var(--gold-light);
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .header h1 {
+    color: #fff;
+    font-size: clamp(22px, 5vw, 30px);
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .header h1 span { color: var(--gold-light); }
+  .header-sub {
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    margin-top: 6px;
+    margin-bottom: 20px;
+  }
+  .header-tabs {
+    display: flex;
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all .2s;
+    font-family: inherit;
+  }
+  .tab-btn.active {
+    background: var(--bg);
+    color: var(--navy);
+    font-weight: 700;
+  }
+
+  /* ── Main ── */
+  .main { max-width: 640px; margin: 0 auto; padding: 20px 16px 40px; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px 20px;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Segment control ── */
+  .seg-wrap { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .seg-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 10px 8px;
+    border: 2px solid var(--border);
+    background: transparent;
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+    font-family: inherit;
+    text-align: center;
+  }
+  .seg-btn:hover { border-color: var(--navy-light); color: var(--navy); }
+  .seg-btn.active {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+    font-weight: 600;
+  }
+  .seg-btn .seg-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+  .seg-btn .seg-sub { font-size: 10px; opacity: 0.7; display: block; }
+
+  /* ── Form controls ── */
+  .form-row { margin-bottom: 14px; }
+  .form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .form-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .input-wrap { position: relative; }
+  .input-prefix {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+  .input-suffix {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 13px;
+    pointer-events: none;
+  }
+  input[type="number"], select {
+    width: 100%;
+    padding: 12px 44px 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 16px;
+    color: var(--text);
+    font-family: inherit;
+    background: #FAFBFE;
+    outline: none;
+    transition: border-color .2s;
+    -webkit-appearance: none;
+  }
+  input[type="number"]:focus, select:focus { border-color: var(--navy); background: #fff; }
+  select { padding-right: 36px; }
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--muted);
+  }
+
+  /* ── Months slider ── */
+  .slider-row { display: flex; align-items: center; gap: 12px; }
+  .slider-row input[type="range"] {
+    flex: 1; padding: 0;
+    border: none; background: transparent;
+    -webkit-appearance: auto;
+    height: 6px;
+    accent-color: var(--navy);
+  }
+  .slider-val {
+    min-width: 50px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 6px 8px;
+  }
+
+  /* ── Rate pills ── */
+  .rate-pills { display: flex; flex-direction: column; gap: 8px; }
+  .rate-pill {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: all .2s;
+    gap: 12px;
+  }
+  .rate-pill:hover { border-color: var(--navy-light); }
+  .rate-pill.active { border-color: var(--gold); background: #FFF9EE; }
+  .rate-pill input[type="radio"] { display: none; }
+  .rate-pill-dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    transition: all .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .rate-pill.active .rate-pill-dot {
+    border-color: var(--gold);
+    background: var(--gold);
+  }
+  .rate-pill.active .rate-pill-dot::after {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: white;
+  }
+  .rate-pill-info { flex: 1; }
+  .rate-pill-label { font-size: 14px; font-weight: 600; color: var(--text); }
+  .rate-pill-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .rate-pill-rate {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--gold);
+  }
+
+  /* ── Calculate btn ── */
+  .calc-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1px;
+    font-family: inherit;
+    transition: all .2s;
+    margin-top: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .calc-btn:hover { background: var(--navy-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(27,58,107,0.3); }
+  .calc-btn:active { transform: translateY(0); }
+
+  /* ── Result card ── */
+  .result-card {
+    background: linear-gradient(135deg, var(--navy) 0%, #2A4A8A 100%);
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    margin-bottom: 14px;
+    display: none;
+    animation: fadeUp .35s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .result-label {
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .result-amount {
+    font-size: clamp(32px, 8vw, 44px);
+    font-weight: 800;
+    color: var(--gold-light);
+    letter-spacing: -1px;
+    margin-bottom: 4px;
+  }
+  .result-amount span { font-size: 18px; font-weight: 500; color: rgba(255,255,255,0.7); margin-right: 6px; }
+  .result-period {
+    color: rgba(255,255,255,0.5);
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .result-item {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .result-item-label { color: rgba(255,255,255,0.55); font-size: 11px; margin-bottom: 4px; }
+  .result-item-val { color: #fff; font-size: 15px; font-weight: 700; }
+  .result-rate-badge {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 13px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── Breakdown ── */
+  .breakdown-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 14px; display: none; }
+  .breakdown-title { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: 1.5px; margin-bottom: 14px; }
+  .formula-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .formula-line:last-child { border-bottom: none; }
+  .fl-label { color: var(--muted); flex: 1; }
+  .fl-val { font-weight: 700; color: var(--text); }
+  .fl-op { color: var(--navy); font-size: 18px; font-weight: 700; }
+  .fl-eq { font-size: 18px; color: var(--gold); font-weight: 800; }
+  .fl-result { font-weight: 800; color: var(--navy); font-size: 16px; }
+  .notice-box {
+    background: #FFF9EE;
+    border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: #7A5A10;
+    line-height: 1.6;
+  }
+
+  /* ── Rate table (2nd tab) ── */
+  .rate-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .rate-table th {
+    background: var(--navy);
+    color: white;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+  .rate-table th:first-child { border-radius: 8px 0 0 0; }
+  .rate-table th:last-child { border-radius: 0 8px 0 0; }
+  .rate-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .rate-table tr:last-child td { border-bottom: none; }
+  .rate-table tr:nth-child(even) td { background: #F7F9FC; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge-blue { background: #E0E8F8; color: var(--navy); }
+  .badge-gold { background: #FFF0CC; color: #8A5A00; }
+  .badge-red  { background: #FDE8E8; color: #8A2020; }
+  .badge-green{ background: #E0F2E9; color: #1E6B42; }
+
+  /* ── Info sections ── */
+  .info-section { margin-bottom: 16px; }
+  .info-section h3 { font-size: 15px; color: var(--navy); font-weight: 700; margin-bottom: 10px; }
+  .info-list { list-style: none; }
+  .info-list li {
+    font-size: 13px;
+    color: #444;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    line-height: 1.5;
+  }
+  .info-list li::before { content: '▸'; color: var(--gold); flex-shrink: 0; }
+
+  /* ── Section display ── */
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+
+  /* ── Tooltip chip ── */
+  .chip { display: inline-block; background: #E8EDF8; color: var(--navy); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 6px; letter-spacing: .5px; }
+
+  @media (max-width: 400px) {
+    .result-grid { grid-template-columns: 1fr; }
+    .seg-btn { min-width: 70px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-badge">🏠 仲介專用工具</div>
+    <h1>房屋稅<span>試算</span>工具</h1>
+    <div class="header-sub">依據 2024 年修正《房屋稅條例》· 2025 年度起適用</div>
+  </div>
+  <div class="header-tabs">
+    <button class="tab-btn active" onclick="switchTab('calc')">📊 試算計算</button>
+    <button class="tab-btn" onclick="switchTab('rates')">📋 稅率表</button>
+    <button class="tab-btn" onclick="switchTab('info')">📌 說明</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ======== TAB 1: 計算 ======== -->
+  <div id="tab-calc" class="tab-section active">
+
+    <!-- STEP 1: 用途 -->
+    <div class="card">
+      <div class="card-title">① 房屋用途</div>
+      <div class="seg-wrap">
+        <button class="seg-btn active" onclick="setUsage('residential',this)">
+          <span class="seg-icon">🏠</span>住家用<span class="seg-sub">自住 / 出租</span>
+        </button>
+        <button class="seg-btn" onclick="setUsage('commercial',this)">
+          <span class="seg-icon">🏪</span>非住家營業用<span class="seg-sub">店面 / 辦公室</span>
+        </button>
+        <button class="seg-btn" onclick="setUsage('noncomm',this)">
+          <span class="seg-icon">🏢</span>非住家非營業<span class="seg-sub">倉庫 / 閒置</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2: 住家條件 -->
+    <div id="residential-opts" class="card">
+      <div class="card-title">② 是否自住使用</div>
+      <div class="rate-pills" id="ownerPills">
+
+        <label class="rate-pill active">
+          <input type="radio" name="owner" value="own" checked onchange="setOwner('own')">
+          <div class="rate-pill-dot"></div>
+          <div class="rate-pill-info">
+            <div class="rate-pill-label">本人 / 配偶 / 直系親屬 自住</div>
+            <div class="rate-pill-desc">全國以 3 戶為限，每戶設籍使用</div>
+          </div>
+          <div class="rate-pill-rate">1.2%</div>
+        </label>
+
+        <label class="rate-pill">
+          <input type="radio" name="owner" value="rent1" onchange="setOwner('rent1')">
+          <div class="rate-pill-dot"></div>
+          <div class="rate-pill-info">
+            <div class="rate-pill-label">非自住 — 第 1、2 戶</div>
+            <div class="rate-pill-desc">全國持有非自住住宅第1、2棟</div>
+          </div>
+          <div class="rate-pill-rate">2.4%</div>
+        </label>
+
+        <label class="rate-pill">
+          <input type="radio" name="owner" value="rent2" onchange="setOwner('rent2')">
+          <div class="rate-pill-dot"></div>
+          <div class="rate-pill-info">
+            <div class="rate-pill-label">非自住 — 第 3、4 戶</div>
+            <div class="rate-pill-desc">全國持有非自住住宅第3、4棟</div>
+          </div>
+          <div class="rate-pill-rate">3.6%</div>
+        </label>
+
+        <label class="rate-pill">
+          <input type="radio" name="owner" value="rent3" onchange="setOwner('rent3')">
+          <div class="rate-pill-dot"></div>
+          <div class="rate-pill-info">
+            <div class="rate-pill-label">非自住 — 第 5 戶以上</div>
+            <div class="rate-pill-desc">全國持有非自住住宅第5棟以上</div>
+          </div>
+          <div class="rate-pill-rate">4.8%</div>
+        </label>
+
+      </div>
+    </div>
+
+    <!-- STEP 3: 課稅現值 -->
+    <div class="card">
+      <div class="card-title">③ 課稅現值</div>
+      <div class="form-row">
+        <label class="form-label">房屋課稅現值（元）<span class="chip">查房屋稅籍謄本</span></label>
+        <div class="input-wrap">
+          <span class="input-prefix">$</span>
+          <input type="number" id="taxValue" placeholder="例如：500000" min="0" step="1000"
+            style="padding-left:28px" oninput="formatPreview()" >
+          <span class="input-suffix">元</span>
+        </div>
+        <div class="form-hint" id="valuePreview">請輸入課稅現值，可從繳稅通知單或稅籍謄本查詢</div>
+      </div>
+    </div>
+
+    <!-- STEP 4: 課徵月數 -->
+    <div class="card">
+      <div class="card-title">④ 課徵期間</div>
+      <div class="form-row">
+        <label class="form-label">本期課徵月數（完整課稅為 12 個月）</label>
+        <div class="slider-row">
+          <input type="range" id="monthSlider" min="1" max="12" value="12" oninput="updateMonth(this.value)">
+          <div class="slider-val" id="monthVal">12 個月</div>
+        </div>
+        <div class="form-hint">房屋稅徵收期間：每年 7 月 1 日至隔年 6 月 30 日。若本年度持有未滿 12 個月，依實際月數計算。</div>
+      </div>
+    </div>
+
+    <!-- 計算按鈕 -->
+    <button class="calc-btn" onclick="calculate()">🔢 計算應繳房屋稅</button>
+
+    <!-- 結果 -->
+    <div class="result-card" id="resultCard">
+      <div class="result-label">📋 應繳房屋稅</div>
+      <div class="result-amount"><span>NT$</span><span id="rAmount">0</span></div>
+      <div class="result-period" id="rPeriod"></div>
+      <div class="result-grid">
+        <div class="result-item">
+          <div class="result-item-label">適用稅率</div>
+          <div class="result-item-val"><span class="result-rate-badge" id="rRate">—</span></div>
+        </div>
+        <div class="result-item">
+          <div class="result-item-label">課稅現值</div>
+          <div class="result-item-val" id="rBase">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-item-label">用途類別</div>
+          <div class="result-item-val" id="rType">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-item-label">課徵月數</div>
+          <div class="result-item-val" id="rMonths">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 計算明細 -->
+    <div class="breakdown-card" id="breakdownCard">
+      <div class="breakdown-title">📐 計算明細</div>
+      <div id="formulaArea"></div>
+      <div class="notice-box" id="noticeBox"></div>
+    </div>
+
+  </div><!-- end tab-calc -->
+
+
+  <!-- ======== TAB 2: 稅率表 ======== -->
+  <div id="tab-rates" class="tab-section">
+    <div class="card">
+      <div class="card-title">住家用稅率（2025 年度起）</div>
+      <table class="rate-table">
+        <tr><th>用途</th><th>條件</th><th>稅率</th></tr>
+        <tr><td>住家自住</td><td><span class="badge badge-green">全國 ≤ 3 戶，設籍使用</span></td><td><strong>1.2%</strong></td></tr>
+        <tr><td>住家非自住</td><td><span class="badge badge-blue">非自住第 1、2 戶</span></td><td><strong>2.4%</strong></td></tr>
+        <tr><td>住家非自住</td><td><span class="badge badge-gold">非自住第 3、4 戶</span></td><td><strong>3.6%</strong></td></tr>
+        <tr><td>住家非自住</td><td><span class="badge badge-red">非自住第 5 戶以上</span></td><td><strong>4.8%</strong></td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">非住家用稅率</div>
+      <table class="rate-table">
+        <tr><th>用途</th><th>說明</th><th>稅率</th></tr>
+        <tr><td>非住家營業用</td><td>店面、辦公室、工廠</td><td><strong>3.0%</strong></td></tr>
+        <tr><td>非住家非營業</td><td>倉庫、閒置廠房</td><td><strong>2.0%</strong></td></tr>
+        <tr><td>私立學校專用</td><td>私校直接用於教學</td><td><strong>1.5%</strong></td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">修法重點（2024 年）</div>
+      <ul class="info-list">
+        <li>非自住住宅稅率由原 1.5%–3.6% 修正為 2.4%–4.8%，依全國持有戶數累進</li>
+        <li>自住優惠 1.2% 維持不變，全國以 3 戶為上限</li>
+        <li>符合「包租代管」之出租住宅，可比照自住稅率 1.2%（需申請）</li>
+        <li>新稅率自 2025 年 7 月起開徵（2025 年度房屋稅）首次適用</li>
+        <li>各地方政府可在法定範圍內自行訂定稅率，請以當地規定為準</li>
+      </ul>
+    </div>
+  </div>
+
+
+  <!-- ======== TAB 3: 說明 ======== -->
+  <div id="tab-info" class="tab-section">
+    <div class="card">
+      <div class="card-title">房屋稅計算公式</div>
+      <div class="info-section">
+        <h3>應納稅額計算</h3>
+        <ul class="info-list">
+          <li>房屋稅 ＝ 房屋課稅現值 × 適用稅率</li>
+          <li>部分年度：× (實際課徵月數 ÷ 12)</li>
+          <li>課稅現值由各地稅捐稽徵機關評定，每年 7 月 1 日起至次年 6 月 30 日為一課稅年度</li>
+        </ul>
+      </div>
+      <div class="info-section">
+        <h3>課稅現值查詢方式</h3>
+        <ul class="info-list">
+          <li>向各地稅捐稽徵機關申請「房屋稅籍謄本」</li>
+          <li>財政部電子稅務入口網查詢</li>
+          <li>每年繳稅通知單上註明課稅現值</li>
+          <li>買賣時可向賣方索取最近一年繳稅收據</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">自住優惠條件</div>
+      <ul class="info-list">
+        <li>本人、配偶或直系親屬實際居住於該住宅</li>
+        <li>戶籍登記於該住宅</li>
+        <li>全國合計以 3 戶為限（2025 年修正後）</li>
+        <li>無出租或供營業使用</li>
+        <li>每年 3 月 22 日前向稽徵機關提出申請</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">非自住戶數計算方式</div>
+      <ul class="info-list">
+        <li>以納稅義務人（個人或同一家庭）全國持有住宅總戶數計算</li>
+        <li>「家庭」指本人、配偶、未成年子女合計持有</li>
+        <li>贈與後仍計入贈與人持有戶數（特定情況）</li>
+        <li>若持有戶數影響稅率，需向稽徵機關申報全國持有住宅情況</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚠️ 免責聲明</div>
+      <p style="font-size:12px;color:#888;line-height:1.7">
+        本工具僅供試算參考，實際應繳金額以各地稅捐稽徵機關核定為準。稅法規定可能因地方政府規定或年度調整而有所不同，請以最新公告為準。如有疑問，建議洽詢專業稅務顧問或當地稅捐稽徵機關。
+      </p>
+    </div>
+  </div>
+
+</div><!-- end main -->
+
+<script>
+// ── State ──
+let currentUsage = 'residential';
+let currentOwner = 'own';
+let currentMonths = 12;
+
+const RATES = {
+  own:   { rate: 0.012, label: '住家自住', rateStr: '1.2%' },
+  rent1: { rate: 0.024, label: '住家非自住（1–2戶）', rateStr: '2.4%' },
+  rent2: { rate: 0.036, label: '住家非自住（3–4戶）', rateStr: '3.6%' },
+  rent3: { rate: 0.048, label: '住家非自住（5戶以上）', rateStr: '4.8%' },
+  commercial: { rate: 0.030, label: '非住家營業用', rateStr: '3.0%' },
+  noncomm:    { rate: 0.020, label: '非住家非營業', rateStr: '2.0%' },
+};
+
+// ── Tab switch ──
+function switchTab(t) {
+  document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + t).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ── Usage ──
+function setUsage(u, btn) {
+  currentUsage = u;
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const resOpts = document.getElementById('residential-opts');
+  resOpts.style.display = (u === 'residential') ? 'block' : 'none';
+
+  hideResult();
+}
+
+// ── Owner type ──
+function setOwner(v) {
+  currentOwner = v;
+  document.querySelectorAll('.rate-pill').forEach(p => {
+    const inp = p.querySelector('input');
+    p.classList.toggle('active', inp.value === v);
+  });
+  hideResult();
+}
+
+// ── Month slider ──
+function updateMonth(v) {
+  currentMonths = parseInt(v);
+  document.getElementById('monthVal').textContent = v + ' 個月';
+  hideResult();
+}
+
+// ── Preview ──
+function formatPreview() {
+  const v = parseFloat(document.getElementById('taxValue').value);
+  const prev = document.getElementById('valuePreview');
+  if (!isNaN(v) && v > 0) {
+    prev.textContent = '課稅現值：' + formatMoney(v) + ' 元';
+  } else {
+    prev.textContent = '請輸入課稅現值，可從繳稅通知單或稅籍謄本查詢';
+  }
+}
+
+// ── Calculate ──
+function calculate() {
+  const val = parseFloat(document.getElementById('taxValue').value);
+  if (!val || val <= 0) {
+    alert('請輸入有效的課稅現值！');
+    return;
+  }
+
+  let key;
+  if (currentUsage === 'residential') key = currentOwner;
+  else if (currentUsage === 'commercial') key = 'commercial';
+  else key = 'noncomm';
+
+  const info = RATES[key];
+  const fullTax = val * info.rate;
+  const tax = fullTax * (currentMonths / 12);
+
+  // Result card
+  document.getElementById('rAmount').textContent = formatMoney(Math.round(tax));
+  document.getElementById('rRate').textContent = info.rateStr;
+  document.getElementById('rBase').textContent = formatMoney(val) + ' 元';
+  document.getElementById('rType').textContent = info.label;
+  document.getElementById('rMonths').textContent = currentMonths + ' 個月';
+  if (currentMonths === 12) {
+    document.getElementById('rPeriod').textContent = '課徵 12 個月（完整年度）';
+  } else {
+    document.getElementById('rPeriod').textContent =
+      '課徵 ' + currentMonths + ' 個月（部分年度）';
+  }
+
+  document.getElementById('resultCard').style.display = 'block';
+
+  // Formula area
+  let html = '';
+  html += formulaLine('房屋課稅現值', formatMoney(val) + ' 元', '×', '');
+  html += formulaLine('適用稅率', info.rateStr, '=', '');
+  if (currentMonths < 12) {
+    html += formulaLine('年度應納稅額', formatMoney(Math.round(fullTax)) + ' 元', '×', '');
+    html += formulaLine('課徵比例', currentMonths + '/12', '=', '');
+  }
+  html += `<div class="formula-line">
+    <span class="fl-label">💰 應繳房屋稅</span>
+    <span class="fl-eq">=</span>
+    <span class="fl-result">NT$ ${formatMoney(Math.round(tax))}</span>
+  </div>`;
+  document.getElementById('formulaArea').innerHTML = html;
+
+  // Notice
+  let notice = '';
+  if (key === 'own') {
+    notice = '✅ 自住優惠稅率 1.2%，全國以 3 戶為限。須於每年 3 月 22 日前向稽徵機關申請。';
+  } else if (key === 'rent1') {
+    notice = 'ℹ️ 依 2024 年修正稅條例，非自住住宅第 1、2 戶稅率由 1.5% 提高至 2.4%，2025 年度起適用。';
+  } else if (key === 'rent2') {
+    notice = '⚠️ 非自住第 3、4 戶稅率 3.6%。建議評估是否出售或申請包租代管，符合條件可比照自住稅率。';
+  } else if (key === 'rent3') {
+    notice = '🔴 非自住第 5 戶以上稅率達 4.8%，稅負較重。建議洽詢不動產稅務規劃。';
+  } else if (key === 'commercial') {
+    notice = 'ℹ️ 非住家營業用稅率 3%，適用於店面、辦公室、工廠等供營業使用之房屋。';
+  } else {
+    notice = 'ℹ️ 非住家非營業用稅率 2%，適用於倉庫、閒置廠房等非供住家或營業使用之房屋。';
+  }
+  document.getElementById('noticeBox').textContent = notice;
+  document.getElementById('breakdownCard').style.display = 'block';
+
+  // Scroll to result
+  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function formulaLine(label, val, op, extra) {
+  return `<div class="formula-line">
+    <span class="fl-label">${label}</span>
+    <span class="fl-val">${val}</span>
+    <span class="fl-op">${op}</span>
+  </div>`;
+}
+
+function hideResult() {
+  document.getElementById('resultCard').style.display = 'none';
+  document.getElementById('breakdownCard').style.display = 'none';
+}
+
+function formatMoney(n) {
+  return n.toLocaleString('zh-TW');
+}
+
+// Init
+document.getElementById('residential-opts').style.display = 'block';
+</script>
+</body>
+</html>

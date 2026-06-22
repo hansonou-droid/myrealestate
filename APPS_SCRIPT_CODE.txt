@@ -1,0 +1,68 @@
+/* ── Google Apps Script ──
+   貼入 Google 試算表「擴充功能 → Apps Script」
+   設定觸發器：onFormSubmit → 來自試算表 → 提交表單時
+*/
+
+const LINE_ACCESS_TOKEN = "Zsx6Ms19HA1H8o+XUX+njelLPF4EqjSr9nnzlkdKF9khDzUixaJMv7O69bH9xb+w+ONBnRu1RG5tIHBf0/eshmhAHt+eLehCr61aVMJeiSvZLBnWMfw1JwCZcOPLXfY+CGF8P+sDkH2gz+O2zS1q+gdB04t89/1O/w1cDnyilFU=";
+const MY_LINE_USER_ID = "U5f5002de9663a71b662073e34b59950b";
+
+function onFormSubmit(e) {
+  let name = "", phone = "", appointmentTime = "", note = "", timestamp = "";
+
+  if (e.values) {
+    // 來自試算表觸發器
+    timestamp = e.values[0] || "";
+    name = e.values[1] || "";
+    phone = e.values[2] || "";
+    appointmentTime = e.values[3] || "";
+    note = e.values[4] || "";
+  } else if (e.response) {
+    // 來自表單觸發器
+    timestamp = e.response.getTimestamp() || "";
+    const itemResponses = e.response.getItemResponses();
+    let date = "", time = "";
+    for (const ir of itemResponses) {
+      const title = ir.getItem().getTitle();
+      const value = ir.getResponse();
+      if (title.includes("姓名")) name = value;
+      else if (title.includes("電話")) phone = value;
+      else if (title.includes("日期")) date = value;
+      else if (title.includes("時間")) time = value;
+      else if (title.includes("備註") || title.includes("需求")) note = value;
+    }
+    appointmentTime = (date ? date : "") + (time ? " " + time : "");
+  } else {
+    Logger.log("錯誤：無法辨識的事件格式");
+    return;
+  }
+
+  const messageText = `🔔【新房客預約諮詢】\n\n` +
+    `👤 客戶姓名：${name}\n` +
+    `📞 聯絡電話：${phone}\n` +
+    `📅 預約時間：${appointmentTime}\n` +
+    `📝 備註需求：${note}\n\n` +
+    `⏰ 填單時間：${timestamp}`;
+
+  const url = "https://api.line.me/v2/bot/message/push";
+  const payload = {
+    "to": MY_LINE_USER_ID,
+    "messages": [{ "type": "text", "text": messageText }]
+  };
+
+  const options = {
+    "method": "post",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + LINE_ACCESS_TOKEN
+    },
+    "payload": JSON.stringify(payload),
+    "muteHttpExceptions": true
+  };
+
+  try {
+    const response = UrlFetchApp.fetch(url, options);
+    Logger.log("LINE 回應: " + response.getContentText());
+  } catch (error) {
+    Logger.log("發送失敗: " + error);
+  }
+}

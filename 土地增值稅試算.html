@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>土地增值稅試算 · 俊毅的創造空間</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fcfbfa;
+  --card: #fff;
+  --text: #222;
+  --muted: #888;
+  --gold: #c5a880;
+  --gold-light: #f5ede0;
+  --border: #e8e0d6;
+  --navy: #2c3e50;
+  --red: #c0392b;
+  --green: #27ae60;
+  --radius: 12px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: 'Noto Serif TC', serif; font-weight: 600; line-height: 1.3; }
+a { text-decoration: none; color: inherit; }
+
+.navbar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.nav-logo { font-family: 'Noto Serif TC', serif; font-size: 20px; font-weight: 700; color: var(--text); }
+.nav-back { font-size: 14px; color: var(--gold); font-weight: 500; }
+
+.page-header {
+  text-align: center;
+  padding: 48px 20px 32px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.page-header .tag {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.page-header h1 { font-size: 28px; margin-bottom: 8px; }
+.page-header p { font-size: 14px; color: var(--muted); }
+
+.main { max-width: 700px; margin: 0 auto; padding: 0 16px 60px; }
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px 22px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-group { margin-bottom: 14px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #333;
+}
+.form-group .hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  background: #fafafa;
+}
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(197,168,128,0.15);
+  background: #fff;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.seg-wrap { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.seg-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: 10px 8px;
+  border: 2px solid var(--border);
+  background: transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.seg-btn:hover { border-color: var(--gold); color: var(--text); }
+.seg-btn.active { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 600; }
+
+.chip { display: inline-block; background: var(--gold-light); color: #7a5a10; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 6px; letter-spacing: .5px; }
+
+.calc-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--text);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+.calc-btn:hover { background: #444; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+
+.result-card {
+  background: linear-gradient(135deg, var(--text) 0%, #444 100%);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  margin-bottom: 16px;
+  display: none;
+  animation: fadeUp .35s ease;
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.result-label { color: rgba(255,255,255,0.6); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.result-amount { font-size: clamp(28px, 7vw, 40px); font-weight: 800; color: var(--gold); letter-spacing: -1px; margin-bottom: 4px; }
+.result-amount span { font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.7); margin-right: 6px; }
+.result-sub { color: rgba(255,255,255,0.5); font-size: 12px; margin-bottom: 16px; }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.result-item { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; }
+.result-item-label { color: rgba(255,255,255,0.55); font-size: 11px; margin-bottom: 3px; }
+.result-item-val { color: #fff; font-size: 14px; font-weight: 700; }
+
+.breakdown-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 16px; display: none; border: 1px solid var(--border); }
+.breakdown-title { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: 1.5px; margin-bottom: 14px; }
+.formula-line { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.formula-line:last-child { border-bottom: none; }
+.fl-label { color: var(--muted); flex: 1; }
+.fl-val { font-weight: 700; }
+.fl-op { color: var(--gold); font-size: 18px; font-weight: 700; }
+.fl-eq { font-size: 18px; color: var(--gold); font-weight: 800; }
+.fl-result { font-weight: 800; color: var(--text); font-size: 16px; }
+
+.info-box { background: var(--gold-light); border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 12px; font-size: 12px; color: #7a5a10; line-height: 1.6; }
+.info-box strong { color: #5a3e0a; }
+
+.rate-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rate-table th { background: var(--text); color: #fff; padding: 10px 12px; text-align: left; font-weight: 600; }
+.rate-table th:first-child { border-radius: 8px 0 0 0; }
+.rate-table th:last-child { border-radius: 0 8px 0 0; }
+.rate-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.rate-table tr:last-child td { border-bottom: none; }
+.rate-table tr:nth-child(even) td { background: #faf8f5; }
+
+.badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+.badge-green { background: #e8f5e9; color: #2e7d32; }
+.badge-blue { background: #e3f2fd; color: #1565c0; }
+.badge-gold { background: #fff8e1; color: #8a5a00; }
+.badge-red { background: #ffebee; color: #c62828; }
+
+/* ── New elements for date-select / CPI / hold-bar / etc. ── */
+.dt-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.cpi-tag {
+  margin-top: 5px;
+  font-size: 11px; color: var(--gold);
+  display: none; align-items: center; gap: 3px;
+}
+.cpi-tag b { font-size: 13px; font-weight: 700; }
+.pfield { position: relative; }
+.pfield::before {
+  content: 'NT$';
+  position: absolute; left: 11px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px; color: var(--muted);
+  pointer-events: none; z-index: 1;
+}
+.pfield input { padding-left: 38px; }
+.hold-bar {
+  background: #EEF0F5;
+  border-radius: 7px;
+  padding: 9px 13px;
+  font-size: 12px; color: var(--text);
+  margin-top: 8px;
+  display: none;
+  align-items: center; justify-content: space-between;
+}
+.hold-bar.on { display: flex; }
+.hold-bar .hold-years { font-size: 16px; font-weight: 700; color: var(--text); }
+.hold-bar .hold-hint { font-size: 11px; color: var(--gold); margin-top: 2px; }
+.opt-toggle {
+  font-size: 12px; color: #555;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+  user-select: none; margin-top: 2px;
+}
+.opt-body { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); }
+.opt-body.on { display: block; }
+
+.footer { text-align: center; font-size: 12px; color: var(--muted); padding: 30px 16px; border-top: 1px solid var(--border); margin-top: 40px; }
+
+@media (max-width: 600px) {
+  .form-row { grid-template-columns: 1fr; }
+  .result-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">俊毅的創造空間</a>
+  <a href="index.html" class="nav-back">← 返回首頁</a>
+</nav>
+
+<div class="page-header">
+  <div class="tag">LAND VALUE INCREMENT TAX CALCULATOR</div>
+  <h1>土地增值稅試算</h1>
+  <p>依台灣消費者物價指數（CPI）自動調整 — 一般用地 &amp; 自用住宅用地</p>
+</div>
+
+<div class="main">
+
+<!-- ═══ Card 1: 移轉時間與物價指數 ═══ -->
+<div class="card">
+  <div class="card-title">① 移轉時間與物價指數</div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>前次移轉（取得）年月</label>
+      <div class="dt-row">
+        <select id="acq-y" onchange="onDtChange();calcLandTax()">
+          <option value="">民國年</option>
+        </select>
+        <select id="acq-m" onchange="onDtChange();calcLandTax()">
+          <option value="">月份</option>
+        </select>
+      </div>
+      <div class="cpi-tag" id="acq-tag">
+        CPI指數：<b id="acq-cpi">—</b>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>本次移轉（出售）年月</label>
+      <div class="dt-row">
+        <select id="disp-y" onchange="onDtChange();calcLandTax()">
+          <option value="">民國年</option>
+        </select>
+        <select id="disp-m" onchange="onDtChange();calcLandTax()">
+          <option value="">月份</option>
+        </select>
+      </div>
+      <div class="cpi-tag" id="disp-tag">
+        CPI指數：<b id="disp-cpi">—</b>
+      </div>
+    </div>
+  </div>
+  <div class="hold-bar" id="hold-bar">
+    <div>
+      <div style="font-size:11px;color:var(--muted)">持有期間</div>
+      <div class="hold-years" id="hold-yrs">—</div>
+    </div>
+    <div class="hold-hint" id="hold-hint"></div>
+  </div>
+</div>
+
+<!-- ═══ Card 2: 地價資料 ═══ -->
+<div class="card">
+  <div class="card-title">② 地價資料</div>
+
+  <span class="opt-toggle" onclick="toggleAreaMode()">
+    <span id="area-arr">▶</span> 以單價×面積×持分計算
+  </span>
+  <div class="opt-body" id="area-body">
+    <div class="form-row">
+      <div class="form-group">
+        <label>原地價單價（元／㎡）</label>
+        <input type="text" id="orig-unit" placeholder="0" oninput="updateAreaTotals()" onblur="fmtNum(this)">
+      </div>
+      <div class="form-group">
+        <label>公告現值單價（元／㎡）</label>
+        <input type="text" id="curr-unit" placeholder="0" oninput="updateAreaTotals()" onblur="fmtNum(this)">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>基地面積（㎡）</label>
+        <input type="text" id="land-area" placeholder="0" oninput="updateAreaTotals()" onblur="fmtNum(this)">
+      </div>
+      <div class="form-group">
+        <label>持分比例</label>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;">
+          <input type="text" id="share-num" placeholder="分子" oninput="updateAreaTotals()">
+          <span style="font-size:16px;font-weight:700;color:var(--muted);">／</span>
+          <input type="text" id="share-den" placeholder="分母" oninput="updateAreaTotals()" value="1">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label>前次移轉申報地價（或原規定地價）</label>
+      <div class="pfield">
+        <input type="text" id="orig-val" placeholder="0" oninput="calcLandTax()" onblur="fmtNum(this)">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>本次申報移轉現值</label>
+      <div class="pfield">
+        <input type="text" id="curr-val" placeholder="0" oninput="calcLandTax()" onblur="fmtNum(this)">
+      </div>
+    </div>
+  </div>
+
+  <span class="opt-toggle" onclick="toggleOpt()">
+    <span id="opt-arr">▶</span> 加計可扣除費用
+  </span>
+  <div class="opt-body" id="opt-body">
+    <div class="form-row" style="margin-top:0;">
+      <div class="form-group">
+        <label>改良費用（如有）</label>
+        <div class="pfield">
+          <input type="text" id="improve" placeholder="0" oninput="calcLandTax()" onblur="fmtNum(this)">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>工程受益費（如有）</label>
+        <div class="pfield">
+          <input type="text" id="benefit" placeholder="0" oninput="calcLandTax()" onblur="fmtNum(this)">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Card 3: 適用稅率 ═══ -->
+<div class="card">
+  <div class="card-title">③ 適用稅率</div>
+  <div class="seg-wrap" style="margin-bottom:14px;">
+    <button class="seg-btn active" onclick="setLandUsage('general',this)">一般用地</button>
+    <button class="seg-btn" onclick="setLandUsage('selfuse',this)">自用住宅用地</button>
+  </div>
+  <div id="generalOptions">
+    <table class="rate-table" style="margin-bottom:12px;">
+      <thead><tr><th>級別</th><th>漲價倍數</th><th>稅率</th><th>累進差額</th></tr></thead>
+      <tbody>
+        <tr><td>第 1 級</td><td>≤ 100%</td><td><span class="badge badge-blue">20%</span></td><td>$0</td></tr>
+        <tr><td>第 2 級</td><td>100% ~ 200%</td><td><span class="badge badge-blue">30%</span></td><td>調整後原地價 × 10%</td></tr>
+        <tr><td>第 3 級</td><td>&gt; 200%</td><td><span class="badge badge-blue">40%</span></td><td>調整後原地價 × 30%</td></tr>
+      </tbody>
+    </table>
+    <div class="info-box">
+      <strong>長期持有減徵（一般用地）：</strong>持有 20 年以上減徵 20% ｜ 30 年以上減徵 40% ｜ 40 年以上減徵 60%<br>
+      <small style="opacity:0.7;">（減徵對象為超過第1級部分之稅額）</small>
+    </div>
+  </div>
+  <div id="selfuseOptions" style="display:none;">
+    <div class="seg-wrap" style="margin-bottom:12px;">
+      <button class="seg-btn active" onclick="setSelfUseType('once',this)">一生一次</button>
+      <button class="seg-btn" onclick="setSelfUseType('forever',this)">一生一屋</button>
+    </div>
+    <div class="info-box">
+      <strong>一生一次：</strong>都市土地 ≤ 3 公畝 或 非都市 ≤ 7 公畝<br>
+      <strong>一生一屋：</strong>已使用過一生一次，都市 ≤ 1.5 公畝 或 非都市 ≤ 3.5 公畝<br>
+      稅率：<strong>10%</strong>（不適用長期持有減徵）
+    </div>
+  </div>
+</div>
+
+<button class="calc-btn" onclick="calcLandTax()">🔢 計算土地增值稅</button>
+
+<!-- ═══ Result ═══ -->
+<div class="result-card" id="landResult">
+  <div class="result-label">📋 應繳土地增值稅</div>
+  <div class="result-amount"><span>NT$</span><span id="lAmount">0</span></div>
+  <div class="result-sub" id="lSubtitle"></div>
+  <div class="result-grid">
+    <div class="result-item"><div class="result-item-label">土地漲價總數額</div><div class="result-item-val" id="lIncrease">—</div></div>
+    <div class="result-item"><div class="result-item-label">漲幅</div><div class="result-item-val" id="lRatio">—</div></div>
+    <div class="result-item"><div class="result-item-label">適用稅率</div><div class="result-item-val" id="lLevel">—</div></div>
+    <div class="result-item"><div class="result-item-label">長期持有減徵</div><div class="result-item-val" id="lDiscount">—</div></div>
+  </div>
+</div>
+
+<div class="breakdown-card" id="landBreakdown">
+  <div class="breakdown-title">📐 計算明細</div>
+  <div id="lFormula"></div>
+  <div class="info-box" id="lNotice"></div>
+</div>
+
+</div>
+
+<footer class="footer">
+  <p>僅供試算參考，實際應繳金額以稅捐稽徵機關核定為準</p>
+  <p style="margin-top:4px;">0938-832-968 ©2026 歐俊毅 版權所有</p>
+</footer>
+
+<script>
+/* ═══════════ CPI DATA（基期：民國110年=100）═══════════ */
+const CPI={
+  48:[9.86,9.94,10.09,10.08,10.09,10.26,10.58,11.16,11.50,11.32,11.00,10.99],
+  49:[11.09,11.34,11.74,12.30,12.24,12.60,12.69,13.25,13.42,13.30,13.31,13.07],
+  50:[13.10,13.35,13.35,13.45,13.46,13.46,13.40,13.56,13.77,13.86,13.75,13.62],
+  51:[13.53,13.68,13.63,13.69,13.87,13.79,13.58,13.72,14.05,14.31,14.12,14.01],
+  52:[14.15,14.16,14.19,14.28,14.16,14.03,13.86,13.89,14.32,14.31,14.14,14.10],
+  53:[14.12,14.14,14.09,14.00,14.05,13.94,13.83,13.99,14.19,14.40,14.38,14.19],
+  54:[14.00,13.96,13.91,13.96,14.03,14.10,14.12,14.20,14.27,14.16,14.19,14.27],
+  55:[14.23,14.03,14.01,14.11,14.14,14.47,14.49,14.42,14.72,14.82,14.62,14.51],
+  56:[14.62,14.90,14.64,14.61,14.67,14.78,14.97,14.94,15.10,15.02,15.00,15.15],
+  57:[15.22,15.11,15.15,15.80,15.88,16.17,16.44,16.86,16.61,16.72,16.40,16.07],
+  58:[16.20,16.41,16.35,16.43,16.25,16.39,16.73,17.06,17.05,18.60,17.79,17.00],
+  59:[16.80,17.08,17.19,17.27,17.19,17.05,17.33,17.84,18.30,18.02,17.80,17.63],
+  60:[17.95,17.88,17.79,17.75,17.77,17.77,17.78,18.09,18.08,18.20,18.15,18.11],
+  61:[17.84,18.22,18.18,18.20,18.29,18.48,18.64,19.30,19.25,18.50,18.26,18.58],
+  62:[18.10,18.36,18.30,18.57,18.81,19.01,19.55,19.98,20.82,22.46,22.91,23.04],
+  63:[25.30,29.14,29.54,29.34,29.10,29.01,29.39,29.72,30.67,30.62,31.06,30.88],
+  64:[30.59,30.63,30.37,30.57,30.59,31.28,31.28,31.39,31.35,31.76,31.50,30.94],
+  65:[31.48,31.59,31.84,31.92,31.76,31.63,31.77,32.00,31.97,31.80,31.72,32.06],
+  66:[32.49,33.01,32.89,33.14,33.28,34.33,34.36,35.88,35.38,35.00,34.40,34.23],
+  67:[34.82,35.08,35.12,35.77,35.75,35.72,35.62,36.27,36.83,37.13,37.01,36.85],
+  68:[36.97,37.14,37.65,38.40,38.73,39.13,39.48,40.50,41.82,41.71,41.11,41.46],
+  69:[43.15,44.01,44.25,44.47,45.31,46.52,46.85,47.92,49.77,50.65,50.72,50.66],
+  70:[52.95,53.85,54.09,54.30,54.09,54.61,54.82,55.36,56.02,55.71,55.34,55.26],
+  71:[55.62,55.44,55.59,55.73,56.07,56.18,56.15,57.85,57.31,56.85,56.39,56.60],
+  72:[56.62,57.19,57.43,57.68,57.28,57.71,57.06,57.03,57.21,57.19,56.71,55.93],
+  73:[55.97,56.54,56.69,56.80,57.49,57.44,57.28,57.49,57.69,57.46,57.13,56.85],
+  74:[56.88,57.33,57.36,57.08,56.90,56.81,56.87,56.62,57.56,57.50,56.70,56.11],
+  75:[56.64,56.80,56.79,56.93,57.01,57.15,57.01,57.32,58.78,58.65,57.84,57.58],
+  76:[57.43,57.31,56.86,57.06,57.07,57.11,57.77,58.24,58.45,57.93,58.09,58.69],
+  77:[57.74,57.51,57.19,57.26,57.91,58.26,58.26,59.09,59.28,59.70,59.39,59.34],
+  78:[59.34,59.86,60.01,60.54,60.99,60.83,60.54,61.05,62.65,63.25,61.62,61.20],
+  79:[61.63,61.54,62.00,62.61,63.27,63.03,63.45,64.50,66.74,65.30,64.04,63.99],
+  80:[64.70,65.09,64.77,65.19,65.41,65.57,66.02,66.17,66.27,66.92,67.12,66.48],
+  81:[67.14,67.73,67.82,68.92,69.15,68.96,68.46,68.15,70.35,70.32,69.20,68.75],
+  82:[69.59,69.80,70.02,70.83,70.59,71.96,70.71,70.42,70.87,71.18,71.34,71.93],
+  83:[71.61,72.54,72.34,73.00,73.68,73.49,73.65,75.38,75.61,74.79,74.11,73.84],
+  84:[75.36,75.04,75.14,76.24,76.10,76.92,76.47,76.67,77.13,76.93,77.24,77.21],
+  85:[77.09,77.85,77.40,78.39,78.30,78.76,77.59,80.54,80.09,79.77,79.71,79.16],
+  86:[78.61,79.46,78.25,78.78,78.89,80.20,80.16,80.07,80.60,79.51,79.30,79.37],
+  87:[80.18,79.69,80.18,80.45,80.20,81.36,80.83,80.43,80.92,81.56,82.40,81.05],
+  88:[80.50,81.36,79.81,80.38,80.60,80.67,80.16,81.35,81.39,81.90,81.66,81.17],
+  89:[80.91,82.11,80.70,81.37,81.88,81.77,81.32,81.57,82.71,82.73,83.50,82.50],
+  90:[82.82,81.27,81.05,81.72,81.70,81.65,81.40,81.94,82.29,83.54,82.55,81.11],
+  91:[81.43,82.42,81.06,81.89,81.49,81.74,81.75,81.72,81.66,82.12,82.09,81.74],
+  92:[82.31,81.17,80.91,81.79,81.75,81.28,80.94,81.24,81.49,82.07,81.71,81.69],
+  93:[82.32,81.69,81.63,82.57,82.49,82.69,83.63,83.31,83.76,84.03,82.95,83.01],
+  94:[82.72,83.27,83.51,83.93,84.39,84.66,85.65,86.28,86.41,86.34,85.03,84.84],
+  95:[84.94,84.09,83.86,84.96,85.73,86.13,86.32,85.80,85.33,85.31,85.24,85.42],
+  96:[85.24,85.56,84.56,85.54,85.71,86.24,86.04,87.18,87.99,89.86,89.33,88.26],
+  97:[87.75,88.87,87.91,88.86,88.90,90.53,91.04,91.27,90.72,92.00,91.05,89.38],
+  98:[89.04,87.68,87.78,88.45,88.82,88.73,88.91,90.52,89.91,90.26,89.59,89.16],
+  99:[89.27,89.74,88.89,89.64,89.49,89.80,90.08,90.09,90.18,90.78,90.95,90.26],
+  100:[90.25,90.93,90.13,90.80,90.98,91.54,91.27,91.30,91.42,91.91,91.89,92.09],
+  101:[92.38,91.15,91.27,92.11,92.57,93.16,93.52,94.43,94.12,94.05,93.35,93.58],
+  102:[93.41,93.85,92.50,93.08,93.25,93.72,93.58,93.69,94.92,94.66,93.98,93.89],
+  103:[94.18,93.81,93.99,94.62,94.76,95.25,95.22,95.64,95.59,95.66,94.78,94.46],
+  104:[93.30,93.62,93.41,93.84,94.07,94.72,94.62,95.21,95.87,95.95,95.29,94.58],
+  105:[94.05,95.88,95.29,95.60,95.23,95.57,95.79,95.75,96.19,97.58,97.17,96.18],
+  106:[96.16,95.82,95.46,95.69,95.80,96.53,96.53,96.67,96.66,97.26,97.50,97.35],
+  107:[97.02,97.93,96.98,97.61,97.48,97.88,98.22,98.16,98.32,98.39,97.78,97.29],
+  108:[97.19,98.14,97.52,98.25,98.39,98.71,98.60,98.58,98.73,98.75,98.35,98.41],
+  109:[99.00,97.94,97.50,97.30,97.20,97.98,98.10,98.25,98.16,98.49,98.44,98.45],
+  110:[98.81,99.29,98.69,99.35,99.58,99.77,99.97,100.55,100.71,101.00,101.24,101.04],
+  111:[101.61,101.60,101.92,102.70,102.96,103.35,103.32,103.24,103.49,103.77,103.62,103.78],
+  112:[104.71,104.06,104.32,105.11,105.04,105.16,105.26,105.85,106.52,106.92,106.62,106.58],
+  113:[106.59,107.26,106.56,107.15,107.38,107.71,107.92,108.34,108.46,108.73,108.84,108.82],
+  114:[109.44,109.00,109.05,109.33,109.03,109.17,109.57,110.07,109.82,110.33,110.16,110.24],
+  115:[110.22,110.91,110.36,111.22,111.43,null,null,null,null,null,null,null]
+};
+
+const MIN_Y=48, MAX_Y=115;
+
+/* ═══════════ State ═══════════ */
+let lUsage='general';
+let lSelfType='once';
+
+/* ═══════════ CPI / Date functions ═══════════ */
+function getCPI(y,m){ const d=CPI[y]; return d?(d[m-1]??null):null; }
+
+function initLandSelects(){
+  ['acq-y','disp-y'].forEach(id=>{
+    const s=document.getElementById(id);
+    for(let y=MIN_Y;y<=MAX_Y;y++){
+      const o=document.createElement('option');
+      o.value=y; o.text=`民國${y}年`; s.appendChild(o);
+    }
+  });
+  ['acq-m','disp-m'].forEach(id=>{
+    const s=document.getElementById(id);
+    for(let m=1;m<=12;m++){
+      const o=document.createElement('option');
+      o.value=m; o.text=`${m}月`; s.appendChild(o);
+    }
+  });
+}
+
+function refreshMonths(yId,mId){
+  const y=parseInt(document.getElementById(yId).value)||0;
+  const ms=document.getElementById(mId);
+  Array.from(ms.options).forEach(o=>{
+    if(!o.value) return;
+    o.disabled=(y===MAX_Y && CPI[y] && CPI[y][parseInt(o.value)-1]===null);
+  });
+}
+
+function updateTag(yId,mId,tagId,cpiId){
+  const y=parseInt(document.getElementById(yId).value)||0;
+  const m=parseInt(document.getElementById(mId).value)||0;
+  const tag=document.getElementById(tagId);
+  if(y&&m){
+    const v=getCPI(y,m);
+    if(v!==null){ tag.style.display='flex'; document.getElementById(cpiId).textContent=v.toFixed(2); return; }
+  }
+  tag.style.display='none';
+}
+
+function calcHold(ay,am,dy,dm){
+  let yrs=dy-ay, mos=dm-am;
+  if(mos<0){yrs--;mos+=12;}
+  return{yrs,mos};
+}
+
+function onDtChange(){
+  refreshMonths('acq-y','acq-m');
+  refreshMonths('disp-y','disp-m');
+  updateTag('acq-y','acq-m','acq-tag','acq-cpi');
+  updateTag('disp-y','disp-m','disp-tag','disp-cpi');
+
+  const ay=parseInt(document.getElementById('acq-y').value)||0;
+  const am=parseInt(document.getElementById('acq-m').value)||0;
+  const dy=parseInt(document.getElementById('disp-y').value)||0;
+  const dm=parseInt(document.getElementById('disp-m').value)||0;
+  const bar=document.getElementById('hold-bar');
+
+  if(ay&&am&&dy&&dm){
+    const{yrs,mos}=calcHold(ay,am,dy,dm);
+    bar.className='hold-bar on';
+    if(yrs<0||(yrs===0&&mos<0)){
+      document.getElementById('hold-yrs').textContent='⚠ 日期有誤';
+      document.getElementById('hold-hint').textContent='';
+    } else {
+      document.getElementById('hold-yrs').textContent=`${yrs}年${mos}個月`;
+      let hint='';
+      if(yrs>=40) hint='可申請長期持有減徵40%';
+      else if(yrs>=30) hint='可申請長期持有減徵30%';
+      else if(yrs>=20) hint='可申請長期持有減徵20%';
+      document.getElementById('hold-hint').textContent=hint;
+    }
+  } else {
+    bar.className='hold-bar';
+  }
+}
+
+function toggleOpt(){
+  const b=document.getElementById('opt-body');
+  const a=document.getElementById('opt-arr');
+  b.classList.toggle('on');
+  a.textContent=b.classList.contains('on')?'▼':'▶';
+}
+
+/* ═══════════ Area mode toggle ═══════════ */
+function toggleAreaMode(){
+  const body=document.getElementById('area-body');
+  const arr=document.getElementById('area-arr');
+  const on=!body.classList.contains('on');
+  body.classList.toggle('on');
+  arr.textContent=on?'▼':'▶';
+  document.getElementById('orig-val').readOnly=on;
+  document.getElementById('curr-val').readOnly=on;
+  if(!on){
+    document.getElementById('orig-val').value='';
+    document.getElementById('curr-val').value='';
+  }
+  calcLandTax();
+}
+
+function updateAreaTotals(){
+  const useArea=document.getElementById('area-body').classList.contains('on');
+  if(!useArea) return;
+  const origUnit=parseVal('orig-unit');
+  const currUnit=parseVal('curr-unit');
+  const area=parseVal('land-area');
+  const sn=parseFloat(document.getElementById('share-num').value)||0;
+  const sd=parseFloat(document.getElementById('share-den').value)||1;
+  const share=sn>0&&sd>0?sn/sd:1;
+  const origTotal=origUnit*area*share;
+  const currTotal=currUnit*area*share;
+  document.getElementById('orig-val').value=origTotal?Math.round(origTotal).toLocaleString('zh-TW'):'';
+  document.getElementById('curr-val').value=currTotal?Math.round(currTotal).toLocaleString('zh-TW'):'';
+  calcLandTax();
+}
+
+/* ═══════════ Input formatting ═══════════ */
+function fmtNum(el){
+  const v=el.value.replace(/[^0-9]/g,'');
+  el.value=v?parseInt(v,10).toLocaleString('zh-TW'):'';
+}
+
+function parseVal(id){
+  return parseFloat((document.getElementById(id).value||'').replace(/,/g,''))||0;
+}
+
+function N(n){ return Math.round(n).toLocaleString('zh-TW'); }
+
+/* ═══════════ Land use toggle ═══════════ */
+function setLandUsage(u, btn){
+  lUsage=u;
+  document.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('generalOptions').style.display=(u==='general')?'block':'none';
+  document.getElementById('selfuseOptions').style.display=(u==='selfuse')?'block':'none';
+  hideResult();
+  calcLandTax();
+}
+
+function setSelfUseType(t, btn){
+  lSelfType=t;
+  document.querySelectorAll('#selfuseOptions .seg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  hideResult();
+  calcLandTax();
+}
+
+/* ═══════════ Main calculation ═══════════ */
+function calcLandTax(){
+  const ay=parseInt(document.getElementById('acq-y').value)||0;
+  const am=parseInt(document.getElementById('acq-m').value)||0;
+  const dy=parseInt(document.getElementById('disp-y').value)||0;
+  const dm=parseInt(document.getElementById('disp-m').value)||0;
+
+  const origVal=parseVal('orig-val');
+  const currVal=parseVal('curr-val');
+  const improve=parseVal('improve');
+  const benefit=parseVal('benefit')
+  const{yrs:holdYrs}=calcHold(ay,am,dy,dm);
+
+  const acqCPI=getCPI(ay,am);
+  const dispCPI=getCPI(dy,dm);
+
+  let valid=1;
+  let msgs=[];
+  if(!ay||!am){valid=0;msgs.push('取得年月');}
+  if(!dy||!dm){valid=0;msgs.push('移轉年月');}
+  if(!origVal){valid=0;msgs.push('前次地價');}
+  if(!currVal){valid=0;msgs.push('本次現值');}
+  if(valid===0){
+    document.getElementById('lAmount').textContent='—';
+    document.getElementById('lIncrease').textContent='—';
+    document.getElementById('lRatio').textContent='—';
+    document.getElementById('lLevel').textContent='—';
+    document.getElementById('lDiscount').textContent='—';
+    document.getElementById('lSubtitle').textContent='請填寫完整資料';
+    document.getElementById('landResult').style.display='block';
+    document.getElementById('landBreakdown').style.display='none';
+    return;
+  }
+
+  if(!acqCPI||!dispCPI){
+    document.getElementById('lAmount').textContent='—';
+    document.getElementById('lIncrease').textContent='—';
+    document.getElementById('lRatio').textContent='—';
+    document.getElementById('lLevel').textContent='—';
+    document.getElementById('lDiscount').textContent='—';
+    document.getElementById('lSubtitle').textContent='所選月份無CPI資料，請重新確認日期';
+    document.getElementById('landResult').style.display='block';
+    document.getElementById('landBreakdown').style.display='none';
+    return;
+  }
+
+  const cpiRatio=dispCPI/acqCPI;
+  const adjAcq=origVal*cpiRatio;
+  const deduct=improve+benefit;
+  const incr=currVal-adjAcq-deduct;
+
+  if(incr<=0){
+    document.getElementById('lAmount').textContent='NT$0';
+    document.getElementById('lIncrease').textContent=origVal>0?'無漲價（$0）':'—';
+    document.getElementById('lRatio').textContent='—';
+    document.getElementById('lLevel').textContent='—';
+    document.getElementById('lDiscount').textContent='—';
+    document.getElementById('lSubtitle').textContent='土地未增值或現值小於原地價，無須繳納土地增值稅';
+    document.getElementById('landResult').style.display='block';
+    document.getElementById('landBreakdown').style.display='none';
+    return;
+  }
+
+  const incrPct=(incr/adjAcq)*100;
+
+  let tax=0, base=adjAcq;
+  let brackets=[];
+
+  if(lUsage==='self'){
+    tax=incr*0.10;
+    brackets=[{l:'漲價總數額 × 10%（自用住宅優惠）',v:tax}];
+  } else {
+    if(incr<=base){
+      tax=incr*0.20;
+      brackets=[{l:`漲幅 ${incrPct.toFixed(1)}%（未超100%）× 20%`,v:tax}];
+    } else if(incr<=base*2){
+      const t1=base*0.20, t2=(incr-base)*0.30;
+      tax=t1+t2;
+      brackets=[
+        {l:`前100%（NT$ ${N(base)}）× 20%`,v:t1},
+        {l:`超100%部分（NT$ ${N(incr-base)}）× 30%`,v:t2}
+      ];
+    } else {
+      const t1=base*0.20, t2=base*0.30, t3=(incr-base*2)*0.40;
+      tax=t1+t2+t3;
+      brackets=[
+        {l:`前100%（NT$ ${N(base)}）× 20%`,v:t1},
+        {l:`次100%（NT$ ${N(base)}）× 30%`,v:t2},
+        {l:`超200%部分（NT$ ${N(incr-base*2)}）× 40%`,v:t3}
+      ];
+    }
+
+    if(incr>base){
+      let dr=0,dn='';
+      if(holdYrs>=40){dr=0.40;dn='持有40年以上減徵40%';}
+      else if(holdYrs>=30){dr=0.30;dn='持有30年以上減徵30%';}
+      else if(holdYrs>=20){dr=0.20;dn='持有20年以上減徵20%';}
+      if(dr>0){
+        const taxExcess=tax-base*0.20;
+        const disc=taxExcess*dr;
+        tax-=disc;
+        brackets.push({l:dn,v:-disc,disc:true});
+      }
+    }
+  }
+
+  /* === Rate label === */
+  let rateLabel='';
+  if(lUsage==='self') rateLabel='自用住宅優惠稅率 10%';
+  else if(incrPct<=100) rateLabel='一般用地 20%';
+  else if(incrPct<=200) rateLabel='一般用地 20%→30%（累進）';
+  else rateLabel='一般用地 20%→30%→40%（累進）';
+
+  let discountLabel='無';
+  if(lUsage==='self'){
+    discountLabel='不適用';
+  } else {
+    if(holdYrs>=40) discountLabel='40%（持有40年以上）';
+    else if(holdYrs>=30) discountLabel='30%（持有30年以上）';
+    else if(holdYrs>=20) discountLabel='20%（持有20年以上）';
+  }
+
+  /* === Display result === */
+  document.getElementById('lAmount').textContent='NT$'+N(tax);
+  document.getElementById('lIncrease').textContent='NT$'+N(incr);
+  document.getElementById('lRatio').textContent=incrPct.toFixed(1)+'%';
+  document.getElementById('lLevel').textContent=rateLabel;
+  document.getElementById('lDiscount').textContent=discountLabel;
+  document.getElementById('lSubtitle').textContent=
+    '漲幅 '+incrPct.toFixed(1)+'%'+
+    (['','20','30','40'].includes(discountLabel.replace(/[^0-9]/g,''))
+      ? ' ｜長期持有減徵'+discountLabel
+      : '');
+
+  document.getElementById('landResult').style.display='block';
+
+  /* === Build breakdown === */
+  const dyObj=document.getElementById('disp-y');
+  const dispYText=dyObj.options[dyObj.selectedIndex]?.text||'';
+  const ayObj=document.getElementById('acq-y');
+  const acqYText=ayObj.options[ayObj.selectedIndex]?.text||'';
+
+  let html='';
+  html+=formulaLine('取得時 CPI',acqCPI.toFixed(2)+'（'+acqYText+am+'月）','');
+  html+=formulaLine('移轉時 CPI',dispCPI.toFixed(2)+'（'+dispYText+dm+'月）','');
+  html+=formulaLine('物價調整倍數',cpiRatio.toFixed(4)+' 倍','×');
+  html+=formulaLine('物調後取得地價','NT$ '+N(adjAcq),'');
+  if(deduct>0) html+=formulaLine('可扣除費用','NT$ '+N(deduct),'–');
+  html+=formulaLine('漲價總數額','NT$ '+N(incr),'');
+  html+=formulaLine('漲幅',incrPct.toFixed(1)+'%','');
+  html+='<div class="formula-line" style="border-bottom:2px solid var(--gold);"></div>';
+
+  brackets.forEach(b=>{
+    const sign=b.disc?'–':'+';
+    html+=formulaLine(b.l,'NT$ '+N(Math.abs(b.v)),sign);
+  });
+
+  html+='<div class="formula-line"><span class="fl-label">💰 應繳土地增值稅</span><span class="fl-eq">=</span><span class="fl-result">NT$ '+N(tax)+'</span></div>';
+  document.getElementById('lFormula').innerHTML=html;
+
+  const notice=lUsage==='self'
+    ? '✅ 自用住宅用地稅率 10%，須符合「一生一次」或「一生一屋」資格，並於出售前 1 年內無出租或營業。'
+    : (holdYrs>=20
+        ? '✅ 適用長期持有減徵，已於計算中扣除（減徵對象為超過第 1 級 20% 部分之稅額）。'
+        : 'ℹ️ 持有未滿 20 年，不適用長期持有減徵。');
+
+  document.getElementById('lNotice').textContent=notice;
+  document.getElementById('landBreakdown').style.display='block';
+  document.getElementById('landResult').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function hideResult(){
+  document.getElementById('landResult').style.display='none';
+  document.getElementById('landBreakdown').style.display='none';
+}
+
+function formulaLine(label,val,op){
+  return '<div class="formula-line"><span class="fl-label">'+label+'</span><span class="fl-val">'+val+'</span><span class="fl-op">'+op+'</span></div>';
+}
+
+/* ═══════════ Init ═══════════ */
+initLandSelects();
+document.getElementById('generalOptions').style.display='block';
+</script>
+</body>
+</html>

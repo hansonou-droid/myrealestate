@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>貸款計算器</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1208;
+    --paper: #f5f0e8;
+    --cream: #ede8dc;
+    --gold: #c9a84c;
+    --gold-light: #e8d5a3;
+    --rust: #8b3a1e;
+    --sage: #4a5e4c;
+    --shadow: rgba(26,18,8,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Serif TC', serif;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(201,168,76,0.08) 39px, rgba(201,168,76,0.08) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(201,168,76,0.06) 39px, rgba(201,168,76,0.06) 40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--rust), var(--gold), var(--sage), var(--gold), var(--rust));
+    z-index: 100;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--gold-light);
+    position: relative;
+  }
+
+  header::after {
+    content: '◆';
+    position: absolute;
+    bottom: -0.7rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--paper);
+    color: var(--gold);
+    padding: 0 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+
+  h1 span {
+    color: var(--rust);
+  }
+
+  .subtitle {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    color: #6b5e4a;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Form Panel ── */
+  .form-panel {
+    background: #fff;
+    border: 1px solid var(--gold-light);
+    border-radius: 2px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 4px 4px 0 var(--gold-light), 0 1px 20px var(--shadow);
+    position: relative;
+  }
+
+  .form-panel::before {
+    content: 'INPUT';
+    position: absolute;
+    top: -0.6rem;
+    left: 1.5rem;
+    background: #fff;
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    padding: 0 0.5rem;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.75rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--sage);
+    text-transform: uppercase;
+  }
+
+  .input-wrap {
+    position: relative;
+  }
+
+  .unit {
+    position: absolute;
+    right: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: #9a8b78;
+    pointer-events: none;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    padding: 0.75rem 2.8rem 0.75rem 1rem;
+    border: 1.5px solid var(--gold-light);
+    border-radius: 2px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 1.05rem;
+    font-weight: 400;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -moz-appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  input[type="number"]:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+    background: #fff;
+  }
+
+  .btn {
+    display: block;
+    width: 100%;
+    margin-top: 2rem;
+    padding: 0.95rem;
+    background: var(--ink);
+    color: var(--gold-light);
+    border: none;
+    border-radius: 2px;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 3px 3px 0 var(--gold);
+  }
+
+  .btn:hover {
+    background: var(--rust);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--gold);
+  }
+
+  .btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--gold);
+  }
+
+  /* ── Summary Cards ── */
+  .summary {
+    display: none;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .summary.show { display: grid; }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--gold-light);
+    border-top: 3px solid var(--gold);
+    border-radius: 2px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 2px 2px 0 var(--gold-light);
+  }
+
+  .card-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #9a8b78;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 0.4rem;
+  }
+
+  .card-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .card-value.accent { color: var(--rust); }
+  .card-value.green { color: var(--sage); }
+
+  /* ── Table ── */
+  .table-wrap {
+    display: none;
+    background: #fff;
+    border: 1px solid var(--gold-light);
+    border-radius: 2px;
+    box-shadow: 4px 4px 0 var(--gold-light), 0 1px 20px var(--shadow);
+    overflow: hidden;
+    animation: fadeUp 0.5s 0.1s ease both;
+    position: relative;
+  }
+
+  .table-wrap.show { display: block; }
+
+  .table-wrap::before {
+    content: 'AMORTIZATION SCHEDULE · 分期還款明細表';
+    display: block;
+    padding: 0.9rem 1.5rem;
+    background: var(--ink);
+    color: var(--gold-light);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+  }
+
+  .table-scroll { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  thead tr {
+    background: var(--cream);
+  }
+
+  th {
+    padding: 0.75rem 1rem;
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sage);
+    border-bottom: 1px solid var(--gold-light);
+    white-space: nowrap;
+  }
+
+  th:first-child { text-align: center; }
+
+  td {
+    padding: 0.6rem 1rem;
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  td:first-child {
+    text-align: center;
+    font-weight: 500;
+    color: var(--gold);
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr:hover td { background: var(--paper); }
+
+  tr.year-start td { border-top: 1px solid var(--gold-light); }
+
+  tr.year-start td:first-child::after {
+    content: attr(data-year);
+    display: block;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    opacity: 0.7;
+  }
+
+  .td-principal { color: var(--rust) !important; }
+  .td-interest  { color: var(--sage) !important; }
+  .td-balance   { font-weight: 500; }
+
+  .interest-bar-cell { width: 80px; }
+  .mini-bar {
+    display: flex;
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+    width: 60px;
+    margin-left: auto;
+  }
+  .bar-p { background: var(--rust); }
+  .bar-i { background: var(--sage); }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--cream);
+    border-top: 1px solid var(--gold-light);
+    font-size: 0.65rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    color: #7a6b58;
+  }
+
+  .leg { display: flex; align-items: center; gap: 0.4rem; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-p { background: var(--rust); }
+  .dot-i { background: var(--sage); }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Error ── */
+  .error {
+    display: none;
+    color: var(--rust);
+    font-size: 0.8rem;
+    font-family: 'DM Mono', monospace;
+    margin-top: 0.75rem;
+    padding: 0.6rem 1rem;
+    border-left: 3px solid var(--rust);
+    background: rgba(139,58,30,0.05);
+  }
+
+  .error.show { display: block; }
+
+  @media (max-width: 600px) {
+    .form-panel { padding: 1.5rem; }
+    .card-value { font-size: 1.1rem; }
+    td, th { padding: 0.5rem 0.6rem; font-size: 0.72rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <p class="eyebrow">Financial Calculator · 財務計算</p>
+    <h1>貸款<span>本利攤還</span>計算器</h1>
+    <p class="subtitle">複利計算 · 等額本息 · 逐期明細</p>
+  </header>
+
+  <div class="form-panel">
+    <div class="form-grid">
+      <div class="field">
+        <label>貸款金額</label>
+        <div class="input-wrap">
+          <input type="number" id="principal" placeholder="1000000" min="1" step="1">
+          <span class="unit">元</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>年利率</label>
+        <div class="input-wrap">
+          <input type="number" id="rate" placeholder="3.5" min="0.01" max="100" step="0.01">
+          <span class="unit">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>貸款年限</label>
+        <div class="input-wrap">
+          <input type="number" id="years" placeholder="20" min="1" max="50" step="1">
+          <span class="unit">年</span>
+        </div>
+      </div>
+    </div>
+    <div class="error" id="error"></div>
+    <button class="btn" onclick="calculate()">▶ 立即試算</button>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary" id="summary">
+    <div class="card">
+      <div class="card-label">每月應繳本利和</div>
+      <div class="card-value accent" id="s-monthly"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">還款總額</div>
+      <div class="card-value" id="s-total"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">總利息支出</div>
+      <div class="card-value green" id="s-interest"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">總還款期數</div>
+      <div class="card-value" id="s-months"></div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap" id="table-wrap">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>期數</th>
+            <th>每月本利和</th>
+            <th>本金還款</th>
+            <th>利息</th>
+            <th>本金/利息比</th>
+            <th>剩餘本金</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <div class="leg"><div class="dot dot-p"></div>本金</div>
+      <div class="leg"><div class="dot dot-i"></div>利息</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function fmt(n) {
+  return n.toLocaleString('zh-TW', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function calculate() {
+  const P = parseFloat(document.getElementById('principal').value);
+  const annualRate = parseFloat(document.getElementById('rate').value);
+  const years = parseInt(document.getElementById('years').value);
+  const errEl = document.getElementById('error');
+
+  // Validation
+  if (isNaN(P) || P <= 0 || isNaN(annualRate) || annualRate <= 0 || isNaN(years) || years <= 0) {
+    errEl.textContent = '⚠ 請確認所有欄位均已正確填入正數值。';
+    errEl.classList.add('show');
+    document.getElementById('summary').classList.remove('show');
+    document.getElementById('table-wrap').classList.remove('show');
+    return;
+  }
+  errEl.classList.remove('show');
+
+  const r = annualRate / 100 / 12; // monthly rate
+  const n = years * 12;            // total months
+
+  // Monthly payment (等額本息公式)
+  const M = P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+
+  let balance = P;
+  let totalInterest = 0;
+  const rows = [];
+
+  for (let i = 1; i <= n; i++) {
+    const interest = balance * r;
+    const principal = M - interest;
+    balance = balance - principal;
+    if (balance < 0.005) balance = 0;
+    totalInterest += interest;
+
+    rows.push({ period: i, payment: M, principal, interest, balance });
+  }
+
+  // Summary
+  document.getElementById('s-monthly').textContent = fmt(M) + ' 元';
+  document.getElementById('s-total').textContent = fmt(M * n) + ' 元';
+  document.getElementById('s-interest').textContent = fmt(totalInterest) + ' 元';
+  document.getElementById('s-months').textContent = n + ' 期';
+  document.getElementById('summary').classList.add('show');
+
+  // Table
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+
+  rows.forEach((row, idx) => {
+    const tr = document.createElement('tr');
+    const isYearStart = (row.period - 1) % 12 === 0 && row.period > 1;
+    if (isYearStart) tr.className = 'year-start';
+
+    const pRatio = Math.round((row.principal / row.payment) * 100);
+    const iRatio = 100 - pRatio;
+
+    const tdPeriod = document.createElement('td');
+    tdPeriod.textContent = row.period;
+    if (isYearStart) {
+      tdPeriod.setAttribute('data-year', `第 ${Math.ceil(row.period / 12)} 年`);
+    }
+
+    tr.innerHTML = `
+      <td>${isYearStart ? `<span style="display:block;font-size:.55rem;color:var(--gold);opacity:.7">第 ${Math.ceil(row.period/12)} 年</span>` : ''}${row.period}</td>
+      <td>${fmt(row.payment)}</td>
+      <td class="td-principal">${fmt(row.principal)}</td>
+      <td class="td-interest">${fmt(row.interest)}</td>
+      <td class="interest-bar-cell">
+        <div class="mini-bar">
+          <div class="bar-p" style="width:${pRatio}%"></div>
+          <div class="bar-i" style="width:${iRatio}%"></div>
+        </div>
+      </td>
+      <td class="td-balance">${fmt(row.balance)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('table-wrap').classList.add('show');
+  document.getElementById('table-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Allow Enter key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') calculate();
+});
+</script>
+</body>
+</html>
