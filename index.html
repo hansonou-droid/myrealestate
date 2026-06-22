@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>毅起成家 · 空間改造實績</title>
+  <title>預見居所 · 空間改造實績</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -14,14 +14,15 @@
   <!-- ====== 頂部導覽列 ====== -->
   <header class="navbar">
     <div class="nav-inner">
-      <a href="#" class="nav-logo">毅起成家</a>
+      <a href="#" class="nav-logo">預見居所</a>
       <nav class="nav-menu">
         <a href="#about">關於我們</a>
         <a href="#services">核心優勢</a>
-        <a href="#team">職人團隊</a>
+        <a href="#team">專業團隊</a>
         <a href="#comparison">實績案例</a>
+        <a href="#contact">預約諮詢</a>
       </nav>
-      <a href="#" class="nav-cta">預約諮詢</a>
+      <a href="#contact" class="nav-cta">預約諮詢</a>
       <!-- 手機漢堡選單 -->
       <button class="nav-toggle" aria-label="選單">☰</button>
     </div>
@@ -31,9 +32,9 @@
   <section class="hero" id="about">
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <p class="hero-subtitle">— 雋永空間 · 細膩工藝 —</p>
+      <p class="hero-subtitle">— 平實空間 · 價值創造 —</p>
       <h1 class="hero-title">專業房仲<br>科技美學創造房屋價值</h1>
-      <p class="hero-desc">從毛胚到完工作品，每一處細節都是職人對完美的偏執。</p>
+      <p class="hero-desc">將毛胚或屋況不好的房子，模擬成精緻典雅的想像空間，創造房子應有的價值。</p>
       <a href="360viewer.html" class="hero-btn">探索3D模擬</a>
     </div>
     <div class="hero-scroll">SCROLL</div>
@@ -83,11 +84,11 @@
     </div>
   </section>
 
-  <!-- ====== 職人團隊區 ====== -->
+  <!-- ====== 專業團隊區 ====== -->
   <section class="team" id="team">
     <div class="section-header">
       <span class="section-tag">TEAM</span>
-      <h2 class="section-title">職人團隊</h2>
+      <h2 class="section-title">專業團隊</h2>
       <div class="section-line"></div>
     </div>
     <div class="team-grid" style="grid-template-columns:1fr;max-width:340px;">
@@ -125,7 +126,7 @@
   <section class="comparison" id="comparison">
     <div class="section-header">
       <span class="section-tag">PORTFOLIO</span>
-      <h2 class="section-title">美學實績 · 細節見證</h2>
+      <h2 class="section-title">預見居所 / 遇見居所</h2>
       <div class="section-line"></div>
       <p class="comparison-hint">左右拖曳拉桿，見證空間的蛻變</p>
     </div>
@@ -146,18 +147,68 @@
     </div>
   </section>
 
-  <!-- ====== 預約諮詢 ====== -->
-  <section class="cta-section">
-    <div class="cta-inner">
-      <h2>預約專屬諮詢</h2>
-      <p>讓我們為您勾勒理想空間的模樣</p>
-      <a href="#" class="cta-btn">立即預約</a>
+  <!-- ====== 預約諮詢表單 ====== -->
+  <section class="contact" id="contact">
+    <div class="section-header">
+      <span class="section-tag">RESERVATION</span>
+      <h2 class="section-title">預約專屬諮詢</h2>
+      <div class="section-line"></div>
+      <p class="contact-sub">填寫以下資訊，我們將盡快與您聯繫</p>
+    </div>
+    <div class="contact-form-wrap">
+      <form id="contact-form" class="contact-form">
+        <div class="form-group">
+          <label for="form-name">姓名</label>
+          <input type="text" id="form-name" name="name" placeholder="請輸入您的姓名" required>
+        </div>
+        <div class="form-group">
+          <label for="form-phone">聯絡電話</label>
+          <input type="tel" id="form-phone" name="phone" placeholder="請輸入您的電話" required>
+        </div>
+        <div class="form-group">
+          <label for="form-date">預約日期</label>
+          <input type="date" id="form-date" name="date" required>
+        </div>
+        <div class="form-group">
+          <label for="form-time">預約時間</label>
+          <select id="form-time" name="time" required>
+            <option value="">請選擇時段</option>
+            <option value="09:00">09:00</option>
+            <option value="09:30">09:30</option>
+            <option value="10:00">10:00</option>
+            <option value="10:30">10:30</option>
+            <option value="11:00">11:00</option>
+            <option value="11:30">11:30</option>
+            <option value="13:00">13:00</option>
+            <option value="13:30">13:30</option>
+            <option value="14:00">14:00</option>
+            <option value="14:30">14:30</option>
+            <option value="15:00">15:00</option>
+            <option value="15:30">15:30</option>
+            <option value="16:00">16:00</option>
+            <option value="16:30">16:30</option>
+            <option value="17:00">17:00</option>
+            <option value="17:30">17:30</option>
+            <option value="18:00">18:00</option>
+            <option value="18:30">18:30</option>
+            <option value="19:00">19:00</option>
+            <option value="19:30">19:30</option>
+            <option value="20:00">20:00</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="form-note">備註需求</label>
+          <textarea id="form-note" name="note" rows="3" placeholder="告訴我們您的需求…"></textarea>
+        </div>
+        <button type="submit" class="form-btn">送出預約</button>
+        <p class="form-note">※ 送出後我們將以電話或 LINE 與您確認時段</p>
+      </form>
     </div>
   </section>
 
   <!-- ====== Footer ====== -->
   <footer class="footer">
-    <p>© 2026 毅起成家 · 新北市板橋區民族路251號 0938-832-968</p>
+    <p>© 2026 預見居所 · 新北市板橋區民族路251號 0938-832-968</p>
   </footer>
 
   <script src="app.js"></script>
