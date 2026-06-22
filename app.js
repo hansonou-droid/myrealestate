@@ -96,3 +96,70 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowRight') updateSlider(slider.getBoundingClientRect().left + (current + step) * slider.offsetWidth / 100)
   if (e.key === 'ArrowLeft')  updateSlider(slider.getBoundingClientRect().left + (current - step) * slider.offsetWidth / 100)
 })
+
+/* ==============================
+   預約表單提交 → Google Form
+   ⚠ 建立 Google 表單後，請置換下方 FORM_ID 與 entry ID
+   ============================== */
+const form = document.getElementById('contact-form')
+
+if (form) {
+  form.addEventListener('submit', (e) => {
+    e.preventDefault()
+
+    const name = document.getElementById('form-name').value.trim()
+    const phone = document.getElementById('form-phone').value.trim()
+    const dateVal = document.getElementById('form-date').value
+    const timeVal = document.getElementById('form-time').value
+    const note = document.getElementById('form-note').value.trim()
+
+    if (!name || !phone || !dateVal || !timeVal) {
+      alert('請填寫姓名、電話、日期與時間')
+      return
+    }
+
+    const btn = form.querySelector('.form-btn')
+    btn.textContent = '送出中…'
+    btn.disabled = true
+
+    // ── 組合日期時間 ──
+    const dateStr = dateVal
+    const timeStr = timeVal.includes(':') ? timeVal : timeVal + ':00'
+
+    // ── Google Form 提交 ──
+    // 使用真實瀏覽器 form submit 到隱藏 iframe，相容所有裝置
+    const FORM_ID = '1FAIpQLSfcqBBKlCHvZliwFg_gNdwSWlP5-wWnXJicbSWGCH_lTm8Xuw'
+
+    // 在 form 內插入 hidden input 對應 Google Form 欄位
+    const hiddenFields = {
+      'entry.1603649042': name,
+      'entry.2067886548': phone,
+      'entry.1058156312': `${dateStr} ${timeStr}`,
+      'entry.1762837529': note
+    }
+
+    for (const [k, v] of Object.entries(hiddenFields)) {
+      const input = document.createElement('input')
+      input.type = 'hidden'
+      input.name = k
+      input.value = v
+      form.appendChild(input)
+    }
+
+    // 設定提交目標為隱藏 iframe
+    form.action = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`
+    form.target = 'gform-target'
+    form.method = 'POST'
+
+    // 使用真實瀏覽器提交（最可靠的方式）
+    form.submit()
+
+    // 顯示成功訊息
+    form.innerHTML = `
+      <div class="form-success show">
+        <h3>預約成功</h3>
+        <p>我們將盡快與您確認時段，謝謝！</p>
+      </div>
+    `
+  })
+}
