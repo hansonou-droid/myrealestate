@@ -20,32 +20,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    .header {
-      background: linear-gradient(135deg, #222 0%, #3a2e24 100%);
-      padding: 28px 24px 24px;
-      color: #fcfbfa;
-      position: relative;
-    }
-    .header-brand {
-      font-family: 'Noto Serif TC', serif;
-      font-size: 13px;
-      letter-spacing: 4px;
-      color: #c5a880;
-      margin-bottom: 8px;
-    }
-    .header h1 {
-      font-family: 'Noto Serif TC', serif;
-      font-size: 22px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      letter-spacing: 1px;
-    }
-    .header p {
-      font-size: 13px;
-      opacity: 0.6;
-      font-weight: 300;
-    }
-
     .content {
       flex: 1;
       padding: 24px 20px;
@@ -146,34 +120,12 @@
       background: #b0926a;
     }
 
-    .btn-share {
-      display: inline-block;
-      width: 100%;
-      padding: 12px 24px;
-      margin-top: 12px;
-      background: transparent;
-      color: #c5a880;
-      border: 1px solid #c5a880;
-      border-radius: 2px;
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 2px;
-      cursor: pointer;
-      transition: background 0.3s, color 0.3s;
-    }
-    .btn-share:active {
-      background: #c5a880;
-      color: #fcfbfa;
-    }
-
     .bottom-tab {
       background: #fff;
       padding: 8px 0;
       border-top: 1px solid #eee;
       display: flex;
       justify-content: center;
-      gap: 40px;
     }
     .tab-item {
       display: flex;
@@ -181,13 +133,9 @@
       align-items: center;
       gap: 2px;
       padding: 4px 0;
-      width: 80px;
+      width: 100px;
       color: #c5a880;
       text-decoration: none;
-      cursor: pointer;
-      background: none;
-      border: none;
-      font-family: 'Noto Sans TC', sans-serif;
     }
     .tab-item svg {
       width: 22px;
@@ -218,10 +166,6 @@
 </head>
 <body>
 
-  <div class="header">
-    <h1>預約委託諮詢</h1>
-  </div>
-
   <div class="content">
     <div class="before-launch" id="notice">
       此頁面需在 LINE 內開啟才能使用完整功能
@@ -243,7 +187,7 @@
       <div class="reserve-info">
         <div class="reserve-info-item">
           <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <span>請電 0938-832-968 或填寫預約時間與您聯絡</span>
+          <span>請電 0938-832-968 或填寫預約單</span>
         </div>
         <div class="reserve-info-item">
           <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
@@ -254,7 +198,6 @@
       <a class="btn-reserve" id="formLink" href="#" target="_blank" rel="noopener">
         填寫預約資料
       </a>
-      <button class="btn-share" id="shareBtn">分享給好朋友</button>
     </div>
   </div>
 
@@ -268,49 +211,14 @@
       </svg>
       <span>預約委託諮詢</span>
     </a>
-    <button class="tab-item" id="shareTab">
-      <svg viewBox="0 0 24 24">
-        <circle cx="18" cy="5" r="3"/>
-        <circle cx="6" cy="12" r="3"/>
-        <circle cx="18" cy="19" r="3"/>
-        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-      </svg>
-      <span>分享好友</span>
-    </button>
   </div>
 
   <script src="https://static.line-scdn.net/liff/edge/2.1/liff.js"></script>
   <script>
     const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfcqBBKlCHvZliwFg_gNdwSWlP5-wWnXJicbSWGCH_lTm8Xuw/viewform';
-    const LIFF_URL = 'https://liff.line.me/2010489308-Gcw8kvOK';
 
     document.getElementById('formLink').href = FORM_URL;
     document.getElementById('tabLink').href = FORM_URL;
-
-    async function shareToFriend() {
-      try {
-        if (!liff.isApiAvailable('shareTargetPicker')) {
-          alert('此功能需在 LINE 內使用');
-          return;
-        }
-        const result = await liff.shareTargetPicker([
-          {
-            type: 'text',
-            text: '🏠 預約委託銷售諮詢\n\n預見居所提供專業空間規劃與房屋銷售諮詢，填寫預約即可獲得專人服務。\n\n' + LIFF_URL
-          }
-        ]);
-        if (result) {
-          liff.closeWindow();
-        }
-      } catch (err) {
-        alert('分享失敗，請稍後再試');
-        console.error('shareTargetPicker error:', err);
-      }
-    }
-
-    document.getElementById('shareBtn').addEventListener('click', shareToFriend);
-    document.getElementById('shareTab').addEventListener('click', shareToFriend);
 
     async function initLiff() {
       try {
