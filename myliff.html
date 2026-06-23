@@ -146,12 +146,34 @@
       background: #b0926a;
     }
 
+    .btn-share {
+      display: inline-block;
+      width: 100%;
+      padding: 12px 24px;
+      margin-top: 12px;
+      background: transparent;
+      color: #c5a880;
+      border: 1px solid #c5a880;
+      border-radius: 2px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+    .btn-share:active {
+      background: #c5a880;
+      color: #fcfbfa;
+    }
+
     .bottom-tab {
       background: #fff;
       padding: 8px 0;
       border-top: 1px solid #eee;
       display: flex;
       justify-content: center;
+      gap: 40px;
     }
     .tab-item {
       display: flex;
@@ -159,9 +181,13 @@
       align-items: center;
       gap: 2px;
       padding: 4px 0;
-      width: 100px;
+      width: 80px;
       color: #c5a880;
       text-decoration: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: 'Noto Sans TC', sans-serif;
     }
     .tab-item svg {
       width: 22px;
@@ -194,7 +220,6 @@
 
   <div class="header">
     <h1>預約委託諮詢</h1>
-    <p>填寫預約資訊，我們將盡快與您聯繫</p>
   </div>
 
   <div class="content">
@@ -229,6 +254,7 @@
       <a class="btn-reserve" id="formLink" href="#" target="_blank" rel="noopener">
         填寫預約資料
       </a>
+      <button class="btn-share" id="shareBtn">分享給好朋友</button>
     </div>
   </div>
 
@@ -242,22 +268,54 @@
       </svg>
       <span>預約委託諮詢</span>
     </a>
+    <button class="tab-item" id="shareTab">
+      <svg viewBox="0 0 24 24">
+        <circle cx="18" cy="5" r="3"/>
+        <circle cx="6" cy="12" r="3"/>
+        <circle cx="18" cy="19" r="3"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+      </svg>
+      <span>分享好友</span>
+    </button>
   </div>
 
   <script src="https://static.line-scdn.net/liff/edge/2.1/liff.js"></script>
   <script>
     const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfcqBBKlCHvZliwFg_gNdwSWlP5-wWnXJicbSWGCH_lTm8Xuw/viewform';
+    const LIFF_URL = 'https://liff.line.me/2010489308-Gcw8kvOK';
 
     document.getElementById('formLink').href = FORM_URL;
     document.getElementById('tabLink').href = FORM_URL;
 
+    async function shareToFriend() {
+      try {
+        if (!liff.isApiAvailable('shareTargetPicker')) {
+          alert('此功能需在 LINE 內使用');
+          return;
+        }
+        const result = await liff.shareTargetPicker([
+          {
+            type: 'text',
+            text: '🏠 預約委託銷售諮詢\n\n預見居所提供專業空間規劃與房屋銷售諮詢，填寫預約即可獲得專人服務。\n\n' + LIFF_URL
+          }
+        ]);
+        if (result) {
+          liff.closeWindow();
+        }
+      } catch (err) {
+        alert('分享失敗，請稍後再試');
+        console.error('shareTargetPicker error:', err);
+      }
+    }
+
+    document.getElementById('shareBtn').addEventListener('click', shareToFriend);
+    document.getElementById('shareTab').addEventListener('click', shareToFriend);
+
     async function initLiff() {
       try {
         await liff.init({ liffId: '2010489308-Gcw8kvOK' });
-        if (liff.isLoggedIn()) {
-          const profile = await liff.getProfile();
-          console.log('User:', profile.displayName);
-        } else {
+        if (!liff.isLoggedIn()) {
           liff.login();
         }
       } catch (err) {
