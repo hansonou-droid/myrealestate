@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- 引入 LINE LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+    <p>正在載入推薦活動，請稍候...</p>
+
+    <script>
+        // 1. 初始化 LIFF
+        liff.init({ liffId: "2010489308-ybDxxYJP" }).then(() => {
+            if (!liff.isLoggedIn()) {
+                liff.login(); // 如果沒登入，強制跳出 LINE 登入授權
+            } else {
+                // 2. 獲取當前「新朋友」的 LINE 資料
+                liff.getProfile().then(profile => {
+                    const newFriendUid = profile.userId; // 新朋友的 UID
+
+                    // 3. 從當前網址中，抓取舊朋友分享出來的「推薦人 UID」
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const referrerUid = urlParams.get('ref') || '無推薦人';
+
+                    // 4. 組合 Google 表單的預填網址
+                    const googleFormUrl = `https://docs.google.com/forms/d/e/1FAIpQLScd2vrv9WfJ3cak54ERlzzVJLczjgqRo91GY7LKeozuqLMtvQ/viewform?usp=pp_url&entry.1639533189=referrer_here&entry.1865511748=newbee_here&entry.1113893748=0938832968`;
+
+                    // 5. 直接跳轉到 Google 表單
+                    window.location.href = googleFormUrl;
+                });
+            }
+        }).catch((err) => {
+            console.error('LIFF 初始化失敗', err);
+        });
+    </script>
+</body>
+</html>
