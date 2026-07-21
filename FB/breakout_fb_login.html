@@ -1,0 +1,413 @@
+
+<h2 class="sr-only">Facebook 粉絲團打磚塊遊戲，含 Facebook 登入與排行榜</h2>
+
+<div style="display:flex;flex-direction:column;align-items:center;padding:1rem 0;font-family:var(--font-sans)">
+  <p style="font-size:22px;font-weight:500;color:var(--text-primary);margin-bottom:4px;text-align:center">打磚塊挑戰賽</p>
+  <p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;text-align:center">破磚得高分，超越朋友排行榜！</p>
+
+  <div style="display:flex;gap:8px;margin-bottom:8px;width:100%;max-width:600px">
+    <div style="background:var(--surface-1);border-radius:var(--radius);padding:6px 0;text-align:center;flex:1">
+      <div style="font-size:11px;color:var(--text-muted)">分數</div>
+      <div id="sc" style="font-size:18px;font-weight:500;color:var(--text-primary)">0</div>
+    </div>
+    <div style="background:var(--surface-1);border-radius:var(--radius);padding:6px 0;text-align:center;flex:1">
+      <div style="font-size:11px;color:var(--text-muted)">關卡</div>
+      <div id="lv" style="font-size:18px;font-weight:500;color:var(--text-primary)">1</div>
+    </div>
+    <div style="background:var(--surface-1);border-radius:var(--radius);padding:6px 0;text-align:center;flex:1">
+      <div style="font-size:11px;color:var(--text-muted)">生命</div>
+      <div id="li" style="font-size:18px;font-weight:500;color:var(--text-primary)">3</div>
+    </div>
+  </div>
+
+  <!-- Name screen -->
+  <div id="nameScr" style="width:100%;max-width:600px;background:var(--surface-2);border:0.5px solid var(--border);border-radius:12px;padding:3rem 2rem;text-align:center;min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
+
+    <!-- FB auto-detect area -->
+    <div id="fbLoadArea" style="display:none;flex-direction:column;align-items:center;gap:12px;margin-bottom:1.5rem">
+      <div id="fbAvatar" style="width:60px;height:60px;border-radius:50%;background:var(--bg-accent);display:flex;align-items:center;justify-content:center">
+        <i class="ti ti-user" style="font-size:28px;color:var(--text-accent)" aria-hidden="true"></i>
+      </div>
+      <p id="fbGreet" style="font-size:16px;font-weight:500;color:var(--text-primary);margin:0"></p>
+      <p style="font-size:13px;color:var(--text-secondary);margin:0">準備好登上排行榜了嗎？</p>
+      <button id="fbStartBtn" onclick="startGame()" style="font-size:15px;padding:8px 40px;margin-top:4px">開始遊戲</button>
+      <button onclick="showManualInput()" style="font-size:13px;padding:4px 16px;color:var(--text-muted);border-color:var(--border)">使用其他暱稱</button>
+    </div>
+
+    <!-- FB login button (shown when FB available but not logged in) -->
+    <div id="fbLoginArea" style="display:none;flex-direction:column;align-items:center;gap:12px;margin-bottom:1.5rem">
+      <i class="ti ti-brand-facebook" style="font-size:44px;color:#1877F2;margin-bottom:4px" aria-hidden="true"></i>
+      <p style="font-size:16px;font-weight:500;color:var(--text-primary);margin:0">使用 Facebook 帳號</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin:0">登入後自動帶入你的名字</p>
+      <button id="fbLoginBtn" onclick="doFBLogin()" style="font-size:15px;padding:9px 36px;background:#1877F2;color:#fff;border-color:#1877F2">
+        <i class="ti ti-brand-facebook" aria-hidden="true"></i> 繼續使用 Facebook
+      </button>
+      <div style="display:flex;align-items:center;gap:10px;width:220px;margin:4px 0">
+        <div style="flex:1;height:0.5px;background:var(--border)"></div>
+        <span style="font-size:12px;color:var(--text-muted)">或</span>
+        <div style="flex:1;height:0.5px;background:var(--border)"></div>
+      </div>
+    </div>
+
+    <!-- Manual input (always shown as fallback) -->
+    <div id="manualArea" style="display:flex;flex-direction:column;align-items:center;gap:0">
+      <i id="manualIcon" class="ti ti-layout-grid" style="font-size:48px;color:var(--text-muted);margin-bottom:1.25rem" aria-hidden="true"></i>
+      <p id="manualTitle" style="font-size:18px;font-weight:500;color:var(--text-primary);margin-bottom:6px">輸入你的暱稱</p>
+      <p id="manualSub" style="font-size:14px;color:var(--text-secondary);margin-bottom:1.25rem">準備好登上排行榜了嗎？</p>
+      <input id="nameIn" type="text" placeholder="暱稱（最多10字）" maxlength="10" style="width:240px;margin-bottom:1rem;text-align:center;font-size:15px">
+      <button onclick="startGame()" style="font-size:15px;padding:8px 40px">開始遊戲</button>
+    </div>
+
+    <p style="margin-top:1.5rem;font-size:12px;color:var(--text-muted)">滑鼠移動 / 觸控滑動控制球拍 · 點擊畫面發球</p>
+
+    <!-- Config note (only shown in non-FB environment) -->
+    <div id="configNote" style="display:none;margin-top:1.25rem;background:var(--bg-warning);border:0.5px solid var(--border-warning);border-radius:var(--radius);padding:10px 14px;max-width:380px;text-align:left">
+      <p style="font-size:12px;color:var(--text-warning);font-weight:500;margin-bottom:4px">
+        <i class="ti ti-info-circle" aria-hidden="true"></i> 開發者提示
+      </p>
+      <p style="font-size:12px;color:var(--text-warning);margin:0;line-height:1.6">
+        Facebook 自動登入需設定 App ID。請至 developers.facebook.com 建立應用程式，並將 <code>YOUR_APP_ID</code> 替換為實際 ID。
+      </p>
+    </div>
+  </div>
+
+  <canvas id="gc" width="600" height="420" style="display:none;border-radius:12px;border:0.5px solid var(--border);cursor:none;width:100%;max-width:600px"></canvas>
+
+  <div id="goScr" style="display:none;width:100%;max-width:600px;background:var(--surface-2);border:0.5px solid var(--border);border-radius:12px;padding:3rem 2rem;text-align:center;min-height:420px;flex-direction:column;align-items:center;justify-content:center">
+    <div id="goAvatarWrap" style="width:60px;height:60px;border-radius:50%;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+      <i class="ti ti-trophy" style="font-size:28px;color:var(--text-accent)" aria-hidden="true"></i>
+    </div>
+    <p id="goName" style="font-size:15px;color:var(--text-secondary);margin-bottom:2px"></p>
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:4px">最終得分</p>
+    <p id="goScore" style="font-size:52px;font-weight:500;color:var(--text-primary);margin-bottom:2px">0</p>
+    <p id="goMsg" style="font-size:14px;color:var(--text-secondary);margin:0.75rem 0 2rem;max-width:280px"></p>
+    <button onclick="resetGame()" style="font-size:15px;padding:8px 40px">再玩一次</button>
+  </div>
+
+  <div style="width:100%;max-width:600px;margin-top:1.5rem;background:var(--surface-1);border-radius:12px;border:0.5px solid var(--border);padding:1rem 1.25rem">
+    <h3 style="font-size:16px;font-weight:500;color:var(--text-primary);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+      <i class="ti ti-trophy" style="font-size:18px;color:var(--text-accent)" aria-hidden="true"></i>
+      排行榜 Top 10
+    </h3>
+    <div id="lbC"><p style="text-align:center;color:var(--text-muted);font-size:14px;padding:0.75rem 0">載入中...</p></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// ★ 設定你的 Facebook App ID（在 developers.facebook.com 取得）
+const FB_APP_ID = 'YOUR_APP_ID';
+// ============================================================
+
+const GW=600,GH=420,COLS=10,ROWS=6;
+const BW=52,BH=18,BPX=4,BPY=4,BX0=22,BY0=44;
+const PW0=90,PH=12,PY0=390,BR=8;
+const BCOLORS=['#e24b4a','#d06030','#ba8018','#2a9e50','#2579c2','#7055cc'];
+const BPTS=[80,65,50,40,30,20];
+let gs='name',pname='',fbPicUrl='',score=0,level=1,lives=3;
+let paddle,ball,bricks,parts=[],pops=[];
+let canvas,ctx,raf,keys={};
+let fbReady=false,fbUserId='';
+
+const mkPad=()=>({x:GW/2-PW0/2,y:PY0,w:PW0,h:PH});
+const mkBall=()=>({x:GW/2,y:PY0-BR-2,vx:0,vy:0,go:false});
+const mkBricks=()=>{
+  let b=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)
+    b.push({x:BX0+c*(BW+BPX),y:BY0+r*(BH+BPY),w:BW,h:BH,c:BCOLORS[r],p:BPTS[r],a:true});
+  return b;
+};
+const baseSpd=()=>4.5+(level-1)*0.5;
+
+// ── Facebook SDK ──────────────────────────────────────────────
+window.fbAsyncInit=function(){
+  if(FB_APP_ID==='YOUR_APP_ID'){showConfigNote();return;}
+  try{
+    FB.init({appId:FB_APP_ID,cookie:true,xfbml:false,version:'v19.0'});
+    fbReady=true;
+    FB.getLoginStatus(function(r){
+      if(r.status==='connected'){
+        fetchFBUser();
+      }else{
+        showFBLoginBtn();
+      }
+    });
+  }catch(e){showManualInput();}
+};
+(function(d,s,id){
+  if(d.getElementById(id))return;
+  var js=d.createElement(s);js.id=id;
+  js.src='https://connect.facebook.net/zh_TW/sdk.js';
+  js.onerror=function(){showManualInput();showConfigNote();};
+  d.getElementsByTagName('head')[0].appendChild(js);
+}(document,'script','facebook-jssdk'));
+
+function fetchFBUser(){
+  FB.api('/me',{fields:'name,picture.width(120).height(120)'},function(u){
+    if(!u||u.error){showManualInput();return;}
+    pname=u.name||'玩家';
+    fbUserId=u.id||'';
+    if(u.picture&&u.picture.data&&u.picture.data.url)fbPicUrl=u.picture.data.url;
+    showFBUser();
+  });
+}
+
+function doFBLogin(){
+  if(!fbReady){showManualInput();return;}
+  FB.login(function(r){
+    if(r.authResponse){fetchFBUser();}
+  },{scope:'public_profile'});
+}
+
+function showFBUser(){
+  document.getElementById('fbLoadArea').style.display='flex';
+  document.getElementById('manualArea').style.display='none';
+  document.getElementById('fbLoginArea').style.display='none';
+  let greet=document.getElementById('fbGreet');
+  greet.textContent='你好，'+pname+'！';
+  if(fbPicUrl){
+    let av=document.getElementById('fbAvatar');
+    av.innerHTML='';
+    let img=document.createElement('img');
+    img.src=fbPicUrl;img.style.cssText='width:60px;height:60px;border-radius:50%;object-fit:cover';
+    av.appendChild(img);
+  }
+}
+
+function showFBLoginBtn(){
+  document.getElementById('fbLoginArea').style.display='flex';
+  document.getElementById('manualArea').style.display='flex';
+  document.getElementById('manualIcon').style.display='none';
+  document.getElementById('manualTitle').style.display='none';
+  document.getElementById('manualSub').style.display='none';
+}
+
+function showManualInput(){
+  document.getElementById('manualArea').style.display='flex';
+  document.getElementById('fbLoadArea').style.display='none';
+  document.getElementById('fbLoginArea').style.display='none';
+}
+
+function showConfigNote(){
+  showManualInput();
+  document.getElementById('configNote').style.display='block';
+}
+
+// ── Game logic ────────────────────────────────────────────────
+function launch(){
+  if(ball.go)return;
+  let a=-Math.PI/2+(Math.random()-.5)*0.9,s=baseSpd();
+  ball.vx=Math.cos(a)*s;ball.vy=Math.sin(a)*s;ball.go=true;
+}
+
+function tick(){
+  if(!ball.go){ball.x=paddle.x+paddle.w/2;ball.y=paddle.y-BR-2;return;}
+  ball.x+=ball.vx;ball.y+=ball.vy;
+  if(ball.x-BR<0){ball.x=BR;ball.vx=Math.abs(ball.vx);}
+  if(ball.x+BR>GW){ball.x=GW-BR;ball.vx=-Math.abs(ball.vx);}
+  if(ball.y-BR<0){ball.y=BR;ball.vy=Math.abs(ball.vy);}
+  if(ball.y-BR>GH){loseLife();return;}
+  if(ball.vy>0&&ball.y+BR>=paddle.y&&ball.y<paddle.y+PH&&
+     ball.x>=paddle.x-6&&ball.x<=paddle.x+paddle.w+6){
+    let rel=(ball.x-(paddle.x+paddle.w/2))/(paddle.w/2);
+    let s=Math.max(Math.hypot(ball.vx,ball.vy),baseSpd());
+    let a=rel*1.2;
+    ball.vx=Math.sin(a)*s;ball.vy=-Math.cos(a)*s;ball.y=paddle.y-BR-1;return;
+  }
+  let best=null,bestD=Infinity;
+  for(let b of bricks){
+    if(!b.a)continue;
+    let cx=Math.max(b.x,Math.min(ball.x,b.x+b.w));
+    let cy=Math.max(b.y,Math.min(ball.y,b.y+b.h));
+    let dx=ball.x-cx,dy=ball.y-cy,d=dx*dx+dy*dy;
+    if(d<=BR*BR&&d<bestD){bestD=d;best={b,dx,dy};}
+  }
+  if(best){
+    best.b.a=false;score+=best.b.p;updateUI();
+    spawnParts(best.b);pops.push({x:best.b.x+best.b.w/2,y:best.b.y,t:'+'+best.b.p,l:1});
+    if(Math.abs(best.dx)>Math.abs(best.dy))ball.vx=-ball.vx;else ball.vy=-ball.vy;
+    if(bricks.every(b=>!b.a)){level++;updateUI();bricks=mkBricks();ball=mkBall();paddle.x=GW/2-paddle.w/2;}
+  }
+}
+
+function loseLife(){
+  lives--;updateUI();
+  if(lives<=0){endGame();return;}
+  ball=mkBall();gs='dead';
+  setTimeout(()=>{if(gs==='dead')gs='playing';},850);
+}
+
+function spawnParts(b){
+  let cx=b.x+b.w/2,cy=b.y+b.h/2;
+  for(let i=0;i<10;i++){
+    let a=Math.random()*Math.PI*2,s=1.5+Math.random()*3;
+    parts.push({x:cx,y:cy,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:1,c:b.c,r:2+Math.random()*2.5});
+  }
+}
+
+function updFx(){
+  for(let p of parts){p.x+=p.vx;p.y+=p.vy;p.vy+=0.07;p.l-=0.032;}
+  parts=parts.filter(p=>p.l>0);
+  for(let p of pops){p.y-=1.3;p.l-=0.02;}
+  pops=pops.filter(p=>p.l>0);
+}
+
+function rrp(x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);
+  ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);
+  ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+
+function draw(){
+  if(!ctx)return;
+  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,GW,GH);
+  ctx.strokeStyle='rgba(255,255,255,0.025)';ctx.lineWidth=0.5;
+  for(let x=0;x<GW;x+=28){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,GH);ctx.stroke();}
+  for(let y=0;y<GH;y+=28){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(GW,y);ctx.stroke();}
+  for(let b of bricks){
+    if(!b.a)continue;
+    ctx.fillStyle=b.c;rrp(b.x,b.y,b.w,b.h,3);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.2)';rrp(b.x+2,b.y+2,b.w-4,5,2);ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.25)';ctx.lineWidth=0.5;rrp(b.x,b.y,b.w,b.h,3);ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  for(let p of parts){ctx.globalAlpha=p.l;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}
+  ctx.globalAlpha=1;
+  for(let p of pops){
+    ctx.globalAlpha=p.l*0.9;ctx.fillStyle='#fff';
+    ctx.font='bold 13px sans-serif';ctx.textAlign='center';
+    ctx.fillText(p.t,p.x,p.y);
+  }
+  ctx.globalAlpha=1;
+  ctx.fillStyle=gs==='dead'?'#e06060':'#3d88d8';
+  rrp(paddle.x,paddle.y,paddle.w,paddle.h,6);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.2)';rrp(paddle.x+10,paddle.y+2,paddle.w-20,5,2);ctx.fill();
+  ctx.beginPath();ctx.arc(ball.x,ball.y,BR,0,Math.PI*2);
+  ctx.fillStyle=gs==='dead'?'#ff9090':'#ffffff';ctx.fill();
+  ctx.beginPath();ctx.arc(ball.x-2.5,ball.y-2.5,3,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.45)';ctx.fill();
+  if(!ball.go&&gs==='playing'){
+    ctx.textAlign='center';ctx.font='13px sans-serif';
+    ctx.fillStyle='rgba(255,255,255,0.4)';
+    ctx.fillText('點擊畫面 / 按空白鍵 發球',GW/2,GH-12);
+  }
+  if(gs==='dead'){ctx.fillStyle='rgba(255,50,50,0.1)';ctx.fillRect(0,0,GW,GH);}
+}
+
+function loop(){
+  if(gs==='playing')tick();
+  if(gs==='playing'||gs==='dead'){updFx();draw();}
+  raf=requestAnimationFrame(loop);
+}
+
+function updateUI(){
+  document.getElementById('sc').textContent=score.toLocaleString();
+  document.getElementById('lv').textContent=level;
+  document.getElementById('li').textContent=lives;
+}
+
+function startGame(){
+  let n=document.getElementById('nameIn').value.trim();
+  if(n)pname=n;
+  if(!pname)pname='匿名玩家';
+  score=0;level=1;lives=3;
+  paddle=mkPad();ball=mkBall();bricks=mkBricks();parts=[];pops=[];
+  updateUI();
+  canvas=document.getElementById('gc');ctx=canvas.getContext('2d');
+  document.getElementById('nameScr').style.display='none';
+  document.getElementById('goScr').style.display='none';
+  canvas.style.display='block';
+  gs='playing';if(raf)cancelAnimationFrame(raf);loop();
+}
+
+async function endGame(){
+  gs='over';if(raf)cancelAnimationFrame(raf);
+  canvas.style.display='none';
+  let g=document.getElementById('goScr');g.style.display='flex';
+  document.getElementById('goScore').textContent=score.toLocaleString();
+  document.getElementById('goName').textContent=pname+' 的成績';
+  if(fbPicUrl){
+    let w=document.getElementById('goAvatarWrap');w.innerHTML='';
+    let img=document.createElement('img');
+    img.src=fbPicUrl;img.style.cssText='width:60px;height:60px;border-radius:50%;object-fit:cover';
+    w.appendChild(img);
+  }
+  let msg=score>=1000?'史詩級成績！快分享讓朋友挑戰你！':score>=500?'超棒！繼續練習衝破紀錄！':'再來一局，你可以更好！';
+  document.getElementById('goMsg').textContent=msg;
+  await saveScore();await loadLB();
+}
+
+function resetGame(){
+  document.getElementById('goScr').style.display='none';
+  document.getElementById('nameScr').style.display='flex';
+  if(canvas)canvas.style.display='none';gs='name';
+}
+
+async function saveScore(){
+  try{
+    let arr=[];
+    try{let r=await window.storage.get('bbo_scores',true);if(r)arr=JSON.parse(r.value);}catch(e){}
+    let d=new Date();let ds=(d.getMonth()+1)+'/'+(d.getDate());
+    let entry={n:pname,s:score,d:ds};
+    if(fbUserId)entry.fid=fbUserId;
+    arr.push(entry);
+    arr.sort((a,b)=>b.s-a.s);
+    await window.storage.set('bbo_scores',JSON.stringify(arr.slice(0,120)),true);
+  }catch(e){console.error(e);}
+}
+
+async function loadLB(){
+  let el=document.getElementById('lbC');
+  try{
+    let arr=[];
+    try{let r=await window.storage.get('bbo_scores',true);if(r)arr=JSON.parse(r.value);}catch(e){}
+    arr.sort((a,b)=>b.s-a.s);
+    let top=arr.slice(0,10);
+    if(!top.length){el.innerHTML='<p style="text-align:center;color:var(--text-muted);font-size:14px;padding:0.75rem 0">還沒有記錄，快成為第一名！</p>';return;}
+    let podium=['#d4a017','#7a8c9a','#b5682a'];
+    el.innerHTML=top.map((e,i)=>{
+      let medal=i<3?`<span style="background:${podium[i]};color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:500">${i+1}</span>`:
+        `<span style="color:var(--text-muted);font-size:13px;width:22px;display:inline-block;text-align:center">${i+1}</span>`;
+      let me=e.n===pname;
+      return`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:14px;gap:10px">
+        <span style="width:28px;flex-shrink:0;display:flex;justify-content:center">${medal}</span>
+        <span style="flex:1;font-weight:${me?500:400};color:${me?'var(--text-accent)':'var(--text-primary)'}">${esc(e.n)}${me?' ◀':''}</span>
+        <span style="font-weight:500;min-width:55px;text-align:right;color:var(--text-primary)">${e.s.toLocaleString()}</span>
+        <span style="font-size:12px;color:var(--text-muted);min-width:40px;text-align:right">${e.d}</span>
+      </div>`;
+    }).join('');
+  }catch(e){el.innerHTML='<p style="color:var(--text-muted);font-size:14px;text-align:center">排行榜暫時無法載入</p>';}
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  loadLB();
+  let c=document.getElementById('gc');
+  c.addEventListener('mousemove',e=>{
+    if(gs!=='playing')return;
+    let r=c.getBoundingClientRect(),k=GW/r.width;
+    paddle.x=Math.max(0,Math.min(GW-paddle.w,(e.clientX-r.left)*k-paddle.w/2));
+  });
+  c.addEventListener('touchmove',e=>{
+    e.preventDefault();if(gs!=='playing')return;
+    let r=c.getBoundingClientRect(),k=GW/r.width;
+    paddle.x=Math.max(0,Math.min(GW-paddle.w,(e.touches[0].clientX-r.left)*k-paddle.w/2));
+  },{passive:false});
+  c.addEventListener('click',()=>{if(gs==='playing')launch();});
+  c.addEventListener('touchend',()=>{if(gs==='playing')launch();});
+  document.addEventListener('keydown',e=>{
+    if(e.key===' '){e.preventDefault();if(gs==='playing')launch();}
+    keys[e.key]=true;
+  });
+  document.addEventListener('keyup',e=>{delete keys[e.key];});
+  setInterval(()=>{
+    if(gs!=='playing'||!paddle)return;
+    if(keys['ArrowLeft']||keys['a'])paddle.x=Math.max(0,paddle.x-9);
+    if(keys['ArrowRight']||keys['d'])paddle.x=Math.min(GW-paddle.w,paddle.x+9);
+  },16);
+  document.getElementById('nameIn').addEventListener('keydown',e=>{if(e.key==='Enter')startGame();});
+});
+</script>
